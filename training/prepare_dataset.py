@@ -28,7 +28,7 @@ from dotenv import load_dotenv  # noqa: E402
 
 load_dotenv(REPO_ROOT / ".env")
 
-from groq import Groq  # noqa: E402
+from groq import Groq, RateLimitError  # noqa: E402
 
 from worker.agent.tools import GROQ_MODEL  # noqa: E402
 from worker.pipeline.frame_extractor import check_fps_alignment, extract_rally_frames  # noqa: E402
@@ -99,7 +99,16 @@ def main() -> None:
                     continue
                 frames = extract_rally_frames(video, rally, frames_dir=FRAMES_DIR)
                 summary = summarize_strokes(rally.strokes)
-                target = teacher_label(client, summary, rally.rally_winner)
+                try:
+                    target = teacher_label(client, summary, rally.rally_winner)
+                except RateLimitError as exc:
+                    # Per-minute 429s are retried inside the client; a per-DAY
+                    # quota can't be waited out in-process, so stop cleanly --
+                    # everything written so far is kept and re-running resumes.
+                    if "tokens per day" not in str(exc):
+                        raise
+                    print(json.dumps({**counts, "stopped": "Groq daily token quota reached; re-run later to resume"}))
+                    return
                 if target is None:
                     counts["skipped_bad_label"] += 1
                     continue
