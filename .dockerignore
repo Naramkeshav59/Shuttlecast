@@ -1,0 +1,12 @@
+.git
+.env
+**/__pycache__
+**/*.pyc
+data/videos
+data/training
+data/results
+checkpoints
+training
+tests
+*.safetensors
+*.bin

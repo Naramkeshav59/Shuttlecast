@@ -1,0 +1,514 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  ShuttleCast - API Gateway + Lambda intake/status, SQS job queue, ECS
+  Fargate worker + Streamlit UI behind an ALB, S3 results, DynamoDB job
+  state, CloudWatch logs. Deploy with scripts/deploy_infra.sh.
+
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Public subnets in at least two AZs (the ALB requires two).
+  WorkerDesiredCount:
+    Type: Number
+    Default: 0
+    Description: 0 until an image has been pushed to ECR (scripts/deploy_worker.sh).
+  UiDesiredCount:
+    Type: Number
+    Default: 0
+  ImageTag:
+    Type: String
+    Default: latest
+  GroqApiKeyParam:
+    Type: String
+    Default: /shuttlecast/groq_api_key
+    Description: SSM SecureString parameter name (created by deploy_infra.sh).
+  GeminiApiKeyParam:
+    Type: String
+    Default: ""
+    Description: SSM SecureString parameter name; leave empty to run without vision.
+  MaxRallies:
+    Type: String
+    Default: ""
+    Description: Cap rallies per job (cost/rate-limit control); empty = whole match.
+
+Conditions:
+  HasGemini: !Not [!Equals [!Ref GeminiApiKeyParam, ""]]
+
+Resources:
+  # ---- storage + state ---------------------------------------------------
+  ResultsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  JobsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: job_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: job_id
+          KeyType: HASH
+
+  # ---- queue ---------------------------------------------------------------
+  JobDeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      MessageRetentionPeriod: 1209600
+
+  JobQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      # The worker heartbeats (extends visibility) after every rally, so
+      # this only needs to cover one rally, not a whole match.
+      VisibilityTimeout: 900
+      ReceiveMessageWaitTimeSeconds: 20
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt JobDeadLetterQueue.Arn
+        # above the worker's MAX_ATTEMPTS (3) so the worker marks the job
+        # failed in DynamoDB itself before SQS moves it here
+        maxReceiveCount: 5
+
+  # ---- Lambda --------------------------------------------------------------
+  IntakeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: lambda.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: intake
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [dynamodb:PutItem, dynamodb:UpdateItem]
+                Resource: !GetAtt JobsTable.Arn
+              - Effect: Allow
+                Action: sqs:SendMessage
+                Resource: !GetAtt JobQueue.Arn
+
+  StatusRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: lambda.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: status
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: dynamodb:GetItem
+                Resource: !GetAtt JobsTable.Arn
+              # a presigned URL carries the signer's permissions
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub "${ResultsBucket.Arn}/results/*"
+
+  IntakeFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: python3.12
+      Handler: handler.handler
+      Role: !GetAtt IntakeRole.Arn
+      Timeout: 10
+      MemorySize: 256
+      Environment:
+        Variables:
+          DYNAMODB_TABLE_NAME: !Ref JobsTable
+          SQS_QUEUE_URL: !Ref JobQueue
+      # placeholder; scripts/deploy_api.sh uploads the real code
+      Code:
+        ZipFile: "def handler(event, context): return {'statusCode': 503, 'body': 'not deployed'}"
+
+  StatusFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: python3.12
+      Handler: handler.handler
+      Role: !GetAtt StatusRole.Arn
+      Timeout: 10
+      MemorySize: 256
+      Environment:
+        Variables:
+          DYNAMODB_TABLE_NAME: !Ref JobsTable
+          S3_BUCKET_NAME: !Ref ResultsBucket
+      Code:
+        ZipFile: "def handler(event, context): return {'statusCode': 503, 'body': 'not deployed'}"
+
+  IntakeLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${IntakeFunction}
+      RetentionInDays: 30
+
+  StatusLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${StatusFunction}
+      RetentionInDays: 30
+
+  # ---- API Gateway (HTTP API) ------------------------------------------------
+  HttpApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: shuttlecast
+      ProtocolType: HTTP
+
+  IntakeIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref HttpApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt IntakeFunction.Arn
+      PayloadFormatVersion: "2.0"
+
+  StatusIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref HttpApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt StatusFunction.Arn
+      PayloadFormatVersion: "2.0"
+
+  IntakeRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: POST /jobs
+      Target: !Sub integrations/${IntakeIntegration}
+
+  StatusRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: GET /jobs/{job_id}
+      Target: !Sub integrations/${StatusIntegration}
+
+  ApiStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref HttpApi
+      StageName: $default
+      AutoDeploy: true
+      DefaultRouteSettings:
+        # every job costs model calls; cap the blast radius of a burst
+        ThrottlingBurstLimit: 10
+        ThrottlingRateLimit: 5
+
+  IntakeInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref IntakeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*/*
+
+  StatusInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref StatusFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*/*
+
+  # ---- container registry -----------------------------------------------------
+  WorkerRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      LifecyclePolicy:
+        LifecyclePolicyText: >-
+          {"rules":[{"rulePriority":1,"description":"keep last 5",
+          "selection":{"tagStatus":"any","countType":"imageCountMoreThan","countNumber":5},
+          "action":{"type":"expire"}}]}
+
+  UiRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      LifecyclePolicy:
+        LifecyclePolicyText: >-
+          {"rules":[{"rulePriority":1,"description":"keep last 5",
+          "selection":{"tagStatus":"any","countType":"imageCountMoreThan","countNumber":5},
+          "action":{"type":"expire"}}]}
+
+  # ---- ECS shared -----------------------------------------------------------------
+  Cluster:
+    Type: AWS::ECS::Cluster
+
+  WorkerLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /shuttlecast/worker
+      RetentionInDays: 30
+
+  UiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /shuttlecast/ui
+      RetentionInDays: 30
+
+  TaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: ecs-tasks.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      Policies:
+        - PolicyName: read-api-keys
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: ssm:GetParameters
+                Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/shuttlecast/*
+
+  # ---- worker -----------------------------------------------------------------------
+  WorkerTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: ecs-tasks.amazonaws.com }
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: worker
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
+                  - sqs:ChangeMessageVisibility
+                  - sqs:GetQueueAttributes
+                Resource: !GetAtt JobQueue.Arn
+              - Effect: Allow
+                Action: [dynamodb:GetItem, dynamodb:UpdateItem]
+                Resource: !GetAtt JobsTable.Arn
+              - Effect: Allow
+                Action: [s3:GetObject, s3:PutObject]
+                Resource: !Sub "${ResultsBucket.Arn}/*"
+              # without ListBucket, HeadObject on a missing key returns 403
+              # instead of 404 and storage.exists() can't tell "not uploaded yet"
+              - Effect: Allow
+                Action: s3:ListBucket
+                Resource: !GetAtt ResultsBucket.Arn
+
+  WorkerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ShuttleCast worker - outbound only
+      VpcId: !Ref VpcId
+
+  WorkerTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: shuttlecast-worker
+      RequiresCompatibilities: [FARGATE]
+      NetworkMode: awsvpc
+      Cpu: "1024"
+      Memory: "2048"
+      RuntimePlatform:
+        OperatingSystemFamily: LINUX
+        CpuArchitecture: X86_64
+      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
+      TaskRoleArn: !GetAtt WorkerTaskRole.Arn
+      ContainerDefinitions:
+        - Name: worker
+          Image: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${WorkerRepository}:${ImageTag}
+          Essential: true
+          # longer than one rally's agent run, so a deploy lets the current
+          # rally finish (worker/main.py stops taking jobs on SIGTERM)
+          StopTimeout: 120
+          Environment:
+            - { Name: S3_BUCKET_NAME, Value: !Ref ResultsBucket }
+            - { Name: DYNAMODB_TABLE_NAME, Value: !Ref JobsTable }
+            - { Name: SQS_QUEUE_URL, Value: !Ref JobQueue }
+            - { Name: AWS_DEFAULT_REGION, Value: !Ref AWS::Region }
+            - { Name: MAX_RALLIES, Value: !Ref MaxRallies }
+          Secrets:
+            - Name: GROQ_API_KEY
+              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GroqApiKeyParam}
+            - !If
+              - HasGemini
+              - Name: GEMINI_API_KEY
+                ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GeminiApiKeyParam}
+              - !Ref AWS::NoValue
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref WorkerLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: worker
+
+  WorkerService:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster: !Ref Cluster
+      TaskDefinition: !Ref WorkerTaskDefinition
+      LaunchType: FARGATE
+      DesiredCount: !Ref WorkerDesiredCount
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          # public IP in a public subnet = outbound internet (Groq, Gemini,
+          # ECR) without a ~$32/month NAT gateway; no inbound rules exist.
+          AssignPublicIp: ENABLED
+          Subnets: !Ref SubnetIds
+          SecurityGroups: [!Ref WorkerSecurityGroup]
+
+  # ---- UI behind ALB ------------------------------------------------------------------
+  AlbSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ShuttleCast ALB - public HTTP
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - { IpProtocol: tcp, FromPort: 80, ToPort: 80, CidrIp: 0.0.0.0/0 }
+
+  UiSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ShuttleCast UI - only from the ALB
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8501
+          ToPort: 8501
+          SourceSecurityGroupId: !Ref AlbSecurityGroup
+
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Scheme: internet-facing
+      Subnets: !Ref SubnetIds
+      SecurityGroups: [!Ref AlbSecurityGroup]
+      LoadBalancerAttributes:
+        # Streamlit keeps a websocket open per session; the 60s default
+        # would drop idle sessions mid-poll
+        - { Key: idle_timeout.timeout_seconds, Value: "300" }
+
+  UiTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      VpcId: !Ref VpcId
+      Port: 8501
+      Protocol: HTTP
+      TargetType: ip
+      HealthCheckPath: /_stcore/health
+      TargetGroupAttributes:
+        # Streamlit session state lives in one task's memory
+        - { Key: stickiness.enabled, Value: "true" }
+        - { Key: stickiness.type, Value: lb_cookie }
+
+  HttpListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref UiTargetGroup
+
+  UiTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: shuttlecast-ui
+      RequiresCompatibilities: [FARGATE]
+      NetworkMode: awsvpc
+      Cpu: "512"
+      Memory: "1024"
+      RuntimePlatform:
+        OperatingSystemFamily: LINUX
+        CpuArchitecture: X86_64
+      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
+      ContainerDefinitions:
+        - Name: ui
+          Image: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${UiRepository}:${ImageTag}
+          Essential: true
+          PortMappings:
+            - ContainerPort: 8501
+          Environment:
+            - { Name: SHUTTLECAST_API_URL, Value: !GetAtt HttpApi.ApiEndpoint }
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref UiLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ui
+
+  UiService:
+    Type: AWS::ECS::Service
+    DependsOn: HttpListener
+    Properties:
+      Cluster: !Ref Cluster
+      TaskDefinition: !Ref UiTaskDefinition
+      LaunchType: FARGATE
+      DesiredCount: !Ref UiDesiredCount
+      HealthCheckGracePeriodSeconds: 60
+      LoadBalancers:
+        - ContainerName: ui
+          ContainerPort: 8501
+          TargetGroupArn: !Ref UiTargetGroup
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets: !Ref SubnetIds
+          SecurityGroups: [!Ref UiSecurityGroup]
+
+Outputs:
+  ApiUrl:
+    Value: !GetAtt HttpApi.ApiEndpoint
+  UiUrl:
+    Value: !Sub http://${LoadBalancer.DNSName}
+  BucketName:
+    Value: !Ref ResultsBucket
+  TableName:
+    Value: !Ref JobsTable
+  QueueUrl:
+    Value: !Ref JobQueue
+  ClusterName:
+    Value: !Ref Cluster
+  WorkerServiceName:
+    Value: !GetAtt WorkerService.Name
+  UiServiceName:
+    Value: !GetAtt UiService.Name
+  WorkerRepositoryName:
+    Value: !Ref WorkerRepository
+  UiRepositoryName:
+    Value: !Ref UiRepository
+  IntakeFunctionName:
+    Value: !Ref IntakeFunction
+  StatusFunctionName:
+    Value: !Ref StatusFunction

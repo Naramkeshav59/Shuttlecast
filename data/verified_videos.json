@@ -1,0 +1,24 @@
+{
+  "_doc": "Video files in data/videos/ checked against ShuttleSet's frame_num with scripts/verify_alignment.py. Only aligned=true matches are used by the UI, local_run, training, and uploaded to S3. fps alone is not enough: CHOU's upload has the right fps but a different edit.",
+  "An_Se_Young_Pornpawee_Chochuwong_TOYOTA_THAILAND_OPEN_2021_QuarterFinals": {
+    "file": "TXT-qlniM90.mp4",
+    "aligned": true
+  },
+  "Carolina_Marin_Neslihan_Yigit_TOYOTA_THAILAND_OPEN_2021_QuarterFinals": {
+    "file": "Carolina_Marin_Neslihan_Yigit_TOYOTA_THAILAND_OPEN_2021_QuarterFinals.mp4",
+    "aligned": true
+  },
+  "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals": {
+    "file": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals.mp4",
+    "aligned": true
+  },
+  "Ratchanok_Intanon_Pusarla_V._Sindhu_TOYOTA_THAILAND_OPEN_2021_QuarterFinals": {
+    "file": "Ratchanok_Intanon_Pusarla_V._Sindhu_TOYOTA_THAILAND_OPEN_2021_QuarterFinals.mp4",
+    "aligned": true
+  },
+  "CHOU_Tien_Chen_Jonatan_CHRISTIE_Sudirman_Cup_2019_Quarter-finals": {
+    "file": "CHOU_Tien_Chen_Jonatan_CHRISTIE_Sudirman_Cup_2019_Quarter-finals.mp4",
+    "aligned": false,
+    "note": "Current YouTube upload is a different edit: 49.2 min long vs a 35.7 min annotated span; stroke frames land on venue, coach and close-up shots. Needs a time offset (or the original upload) before use."
+  }
+}

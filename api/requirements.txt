@@ -1,0 +1,2 @@
+# Nothing to install: the Lambda Python runtime already ships boto3, and
+# both handlers are stdlib + boto3 only to keep the zip small.

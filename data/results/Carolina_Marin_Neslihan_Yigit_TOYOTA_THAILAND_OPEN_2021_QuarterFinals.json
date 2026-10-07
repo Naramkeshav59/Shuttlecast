@@ -1,0 +1,41 @@
+{
+  "job_id": null,
+  "match_id": "Carolina_Marin_Neslihan_Yigit_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
+  "youtube_url": null,
+  "fps": 30.0,
+  "rallies": [
+    {
+      "analysis": {
+        "match_id": "Carolina_Marin_Neslihan_Yigit_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
+        "set_num": 1,
+        "rally_id": 1,
+        "depth": "skip",
+        "tactical_pattern": null,
+        "suggestion_type": null,
+        "suggestion_text": null
+      },
+      "start_time_sec": 389.26666666666665,
+      "rally_winner": "B",
+      "n_strokes": 3,
+      "score_a": 0,
+      "score_b": 1
+    },
+    {
+      "analysis": {
+        "match_id": "Carolina_Marin_Neslihan_Yigit_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
+        "set_num": 1,
+        "rally_id": 2,
+        "depth": "deep",
+        "tactical_pattern": "Both players repeatedly occupied positions far from the shuttle’s landing zones – A remained deep in the rear court on net shots and the wrist smash, while B stayed too far back after drops and the final net return.",
+        "suggestion_type": "positioning",
+        "suggestion_text": "A should sprint forward to the front/mid‑court immediately after the opponent’s net shot and stay positioned to attack the wrist smash, and B must move quickly into the front‑court after playing drops or a net shot to cut off angles and be ready for the return."
+      },
+      "start_time_sec": 407.0,
+      "rally_winner": "A",
+      "n_strokes": 9,
+      "score_a": 1,
+      "score_b": 1
+    }
+  ],
+  "errors": []
+}

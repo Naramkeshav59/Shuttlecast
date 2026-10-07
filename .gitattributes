@@ -1,0 +1,6 @@
+# Store and check out text as LF everywhere. Shell scripts with CRLF fail
+# under bash ($'\r': command not found) -- in Git Bash, Docker, and RunPod.
+* text=auto eol=lf
+*.sh text eol=lf
+*.mp4 binary
+*.jpg binary

@@ -1,0 +1,32 @@
+# QLoRA on Qwen2-VL-2B-Instruct. Sized for a 6GB card; on a RunPod 24GB
+# GPU the same config just runs faster (raise per_device_batch_size if you like).
+base_model: Qwen/Qwen2-VL-2B-Instruct
+train_file: data/training/train.jsonl
+eval_file: data/training/eval.jsonl
+output_dir: checkpoints/qwen2vl-shuttlecast-qlora
+
+quantization:
+  load_in_4bit: true
+  bnb_4bit_quant_type: nf4
+  bnb_4bit_use_double_quant: true
+
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  # language-model layers only; the vision encoder stays frozen
+  target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+
+training:
+  epochs: 3
+  learning_rate: 2.0e-4
+  per_device_batch_size: 1
+  gradient_accumulation_steps: 8
+  warmup_ratio: 0.05
+  lr_scheduler: cosine
+  max_grad_norm: 1.0
+  logging_steps: 5
+  eval_steps: 25
+  save_steps: 25
+  gradient_checkpointing: true
+  seed: 42

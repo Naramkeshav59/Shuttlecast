@@ -1,0 +1,15 @@
+# Pinned to versions tested together. Two dependencies (Groq's model list,
+# google-generativeai) changed out from under this project already --
+# unpinned, the next docker build could pull a breaking release.
+pandas==2.2.2
+numpy==2.2.6
+pydantic==2.13.4
+yt-dlp==2026.8.19
+opencv-python-headless==5.0.0.93
+langchain-core==1.6.2
+langchain-groq==1.1.3
+langgraph==1.2.11
+groq==0.37.1
+google-genai==2.22.0
+python-dotenv==1.2.3
+boto3==1.43.109

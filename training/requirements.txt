@@ -1,0 +1,12 @@
+# RunPod training/eval environment. torch is NOT listed: the pod's PyTorch
+# template ships a CUDA build that must match its driver -- don't replace it.
+# Versions below were smoke-tested together (training/finetune.py --smoke);
+# transformers 5 renamed/removed arguments the 4.x docs still show.
+transformers==5.19.0
+peft==0.21.2
+accelerate==1.15.0
+bitsandbytes>=0.45  # CUDA-only, so not covered by the CPU smoke test
+sentence-transformers==6.1.0
+pillow
+pyyaml
+pydantic==2.13.4
