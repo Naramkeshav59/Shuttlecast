@@ -4,5 +4,6 @@ streamlit==1.63.0
 requests==2.34.2
 pydantic==2.13.4
 python-dotenv==1.2.3
+groq==0.37.1  # chat Q&A over the analysis
 # Local mode additionally imports worker.agent / worker.pipeline in-process,
 # so running it locally needs everything in worker/requirements.txt too.

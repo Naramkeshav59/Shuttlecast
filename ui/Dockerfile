@@ -9,6 +9,7 @@ RUN pip install --no-cache-dir -r ui/requirements.txt
 
 COPY shared/ shared/
 COPY ui/ ui/
+COPY .streamlit/ .streamlit/
 COPY data/verified_videos.json data/verified_videos.json
 COPY data/shuttleset/set/match.csv data/shuttleset/set/match.csv
 

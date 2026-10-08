@@ -461,6 +461,10 @@ Resources:
             - ContainerPort: 8501
           Environment:
             - { Name: SHUTTLECAST_API_URL, Value: !GetAtt HttpApi.ApiEndpoint }
+          Secrets:
+            # chat Q&A over the finished analysis (ui/match_qa.py)
+            - Name: GROQ_API_KEY
+              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GroqApiKeyParam}
           LogConfiguration:
             LogDriver: awslogs
             Options:

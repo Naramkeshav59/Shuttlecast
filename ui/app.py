@@ -1,22 +1,28 @@
-"""Streamlit UI for ShuttleCast.
+"""ShuttleCast UI: a chat-style match analyst.
 
-Two modes:
+Each analyzed rally is a message from the agent; the video panel stays
+pinned and jumps to whichever rally you pick; the chat box answers
+questions grounded in the analyses, or ("analyze rally N") runs the agent
+live in local mode.
+
+Modes:
   * AWS mode (SHUTTLECAST_API_URL set): submit a job to API Gateway, poll
-    the status Lambda, then render the JobResult from its presigned S3 URL
-    synced to the YouTube video. Needs only shared/ + data/*.json/csv --
-    never imports worker code, so the UI container stays small.
-  * Local mode (no API URL): run the agent rally-by-rally in-process, or
-    load a full-match result written by scripts/local_run.py.
+    the status Lambda, load the JobResult from its presigned S3 URL. Never
+    imports worker code, so the UI container stays small.
+  * Local mode: load results written by scripts/local_run.py and run the
+    agent in-process for individual rallies.
 """
 import csv
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
+for p in (REPO_ROOT, REPO_ROOT / "ui"):
+    if str(p) not in sys.path:
+        sys.path.insert(0, str(p))
 
 import requests
 import streamlit as st
@@ -24,115 +30,273 @@ from dotenv import load_dotenv
 
 load_dotenv(REPO_ROOT / ".env")
 
-from shared.models import JobResult  # noqa: E402
+from match_qa import answer  # noqa: E402
+from shared.models import JobResult, RallyReport  # noqa: E402
 
 API_URL = os.environ.get("SHUTTLECAST_API_URL", "").rstrip("/")
 REGISTRY = REPO_ROOT / "data" / "verified_videos.json"
 MATCH_CSV = REPO_ROOT / "data" / "shuttleset" / "set" / "match.csv"
 RESULTS_DIR = REPO_ROOT / "data" / "results"
+ANALYZE_CMD = re.compile(r"^\s*analy[sz]e\s+rally\s+(\d+)(?:\s+(?:of\s+)?set\s+(\d+))?\s*$", re.I)
 
-st.set_page_config(page_title="ShuttleCast", layout="wide")
-st.title("ShuttleCast — Per-Rally Tactical Analysis")
+st.set_page_config(page_title="ShuttleCast", page_icon="🏸", layout="wide")
+st.markdown("""
+<style>
+.block-container {padding-top: 2.2rem; max-width: 1400px;}
+[data-testid="stChatMessage"] {border: 1px solid rgba(128,128,128,.18); border-radius: 14px; padding: .8rem 1rem;}
+.sc-pill {display:inline-block; padding:1px 10px; border-radius:999px; font-size:.72rem; font-weight:600;
+          letter-spacing:.02em; margin-right:6px; text-transform:uppercase; vertical-align:middle;}
+.sc-deep {background:#fde2e1; color:#b42318;}
+.sc-surface {background:#fef0c7; color:#b54708;}
+.sc-skip {background:#eaecf0; color:#475467;}
+.sc-type {background:#e0eaff; color:#3538cd;}
+.sc-meta {color:#667085; font-size:.84rem;}
+.sc-label {font-weight:600; color:#203a43;}
+/* keep the video panel in view while the conversation scrolls */
+div[data-testid="stColumn"]:nth-of-type(2) {position: sticky; top: 3.5rem; align-self: flex-start;}
+</style>
+""", unsafe_allow_html=True)
+
+
+# ---- data -----------------------------------------------------------------
+
+@st.cache_data
+def match_index() -> dict[str, dict]:
+    with MATCH_CSV.open(encoding="utf-8") as f:
+        return {row["video"]: row for row in csv.DictReader(f)}
 
 
 @st.cache_data
-def verified_match_urls() -> dict[str, str]:
-    """match_id -> YouTube URL, for matches whose clip is verified aligned."""
+def verified_matches() -> dict[str, dict]:
+    """match_id -> {"url": YouTube URL, "file": local clip name}."""
     registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
-    with MATCH_CSV.open(encoding="utf-8") as f:
-        urls = {row["video"]: row["url"] for row in csv.DictReader(f) if row.get("url")}
+    index = match_index()
     return {
-        m: urls[m] for m, entry in registry.items()
-        if not m.startswith("_") and entry.get("aligned") and m in urls
+        m: {"url": index.get(m, {}).get("url") or None, "file": entry["file"]}
+        for m, entry in registry.items()
+        if not m.startswith("_") and entry.get("aligned")
     }
 
 
+def short_name(match_id: str) -> str:
+    row = match_index().get(match_id)
+    if not row:
+        return match_id.replace("_", " ")
+    return f"{row['winner']} vs {row['loser']} · {row['tournament']} {row['round']}"
+
+
+def load_saved(match_id: str) -> JobResult | None:
+    path = RESULTS_DIR / f"{match_id}.json"
+    return JobResult(**json.loads(path.read_text(encoding="utf-8"))) if path.exists() else None
+
+
+# ---- rendering --------------------------------------------------------------
+
+def pills(analysis) -> str:
+    html = f'<span class="sc-pill sc-{analysis.depth}">{analysis.depth}</span>'
+    if analysis.suggestion_type:
+        html += f'<span class="sc-pill sc-type">{analysis.suggestion_type.replace("_", " ")}</span>'
+    return html
+
+
 def render_trace(messages: list) -> None:
-    with st.expander("Agent trace (Thought / Action / Observation)"):
+    with st.expander("How the agent decided"):
         for msg in messages:
             role = msg.__class__.__name__
-            if role == "HumanMessage":
-                st.text(f"[Question] {msg.content}")
-            elif role == "AIMessage":
+            if role == "AIMessage":
                 if msg.content:
-                    st.text(f"[Thought] {msg.content}")
+                    st.markdown(f"**Thought:** {msg.content}")
                 for call in getattr(msg, "tool_calls", None) or []:
-                    st.text(f"[Action] {call['name']}({call['args']})")
+                    args = ", ".join(f"{k}={v!r}" for k, v in call["args"].items())
+                    st.markdown(f"**Action:** `{call['name']}({args})`")
             elif role == "ToolMessage":
-                st.text(f"[Observation] {msg.content}")
+                st.code(str(msg.content)[:600], language=None)
 
 
-def render_analysis(analysis) -> None:
-    st.markdown(f"**Depth:** `{analysis.depth}`")
-    if analysis.depth != "skip":
-        st.markdown(f"**Suggestion type:** `{analysis.suggestion_type}`")
-        st.markdown(f"**Tactical pattern:** {analysis.tactical_pattern}")
-        st.markdown(f"**Suggestion:** {analysis.suggestion_text}")
-
-
-def render_job_result(result: JobResult, video_source: str) -> None:
-    """Full-match viewer, shared by AWS mode and saved local results."""
-    if not result.rallies:
-        st.warning("No rallies were analyzed.")
-        return
-    depths = [r.analysis.depth for r in result.rallies]
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Rallies analyzed", len(result.rallies))
-    c2.metric("Deep", depths.count("deep"))
-    c3.metric("Surface", depths.count("surface"))
-    c4.metric("Skipped", depths.count("skip"))
-    if result.errors:
-        st.warning(f"{len(result.errors)} rallies failed: "
-                   + ", ".join(f"set {e.set_num} rally {e.rally_id}" for e in result.errors))
-
-    col_list, col_main = st.columns([1, 2])
-    with col_list:
-        idx = st.radio(
-            "Rally", range(len(result.rallies)), key="result_rally",
-            format_func=lambda i: (
-                f"Set {result.rallies[i].analysis.set_num} / Rally {result.rallies[i].analysis.rally_id}"
-                f" — {result.rallies[i].analysis.depth}"
-            ),
+def render_rally(report: RallyReport, trace: list | None = None) -> None:
+    a = report.analysis
+    key = (a.set_num, a.rally_id)
+    with st.chat_message("assistant", avatar="🏸"):
+        head, btn = st.columns([9, 1])
+        head.markdown(
+            f"**Set {a.set_num} · Rally {a.rally_id}** &nbsp;{pills(a)}<br>"
+            f"<span class='sc-meta'>Won by player {report.rally_winner} · {report.n_strokes} strokes · "
+            f"score {report.score_a}–{report.score_b}</span>",
+            unsafe_allow_html=True,
         )
-    report = result.rallies[idx]
-    with col_main:
-        st.subheader(f"Set {report.analysis.set_num} / Rally {report.analysis.rally_id}")
-        st.video(video_source, start_time=int(report.start_time_sec))
-        st.metric("Score after this rally", f"{report.score_a} - {report.score_b}")
-        st.caption(f"{report.n_strokes} strokes, won by {report.rally_winner}")
-        render_analysis(report.analysis)
+        if btn.button("▶", key=f"watch-{key}", help="Watch this rally", use_container_width=True):
+            st.session_state.now_playing = key
+        if a.depth == "skip":
+            st.markdown("<span class='sc-meta'>Clean rally — nothing worth coaching.</span>", unsafe_allow_html=True)
+        else:
+            st.markdown(f"<span class='sc-label'>What happened</span> — {a.tactical_pattern}", unsafe_allow_html=True)
+            st.markdown(f"<span class='sc-label'>Try instead</span> — {a.suggestion_text}", unsafe_allow_html=True)
+        if trace:
+            render_trace(trace)
 
 
-# ---- AWS mode ----------------------------------------------------------
+def render_sidebar_stats(result: JobResult) -> list[str]:
+    depths = [r.analysis.depth for r in result.rallies]
+    last = result.rallies[-1]
+    st.sidebar.markdown("#### Match so far")
+    c1, c2 = st.sidebar.columns(2)
+    c1.metric("Score (A–B)", f"{last.score_a}–{last.score_b}")
+    c2.metric("Rallies", len(result.rallies))
+    c1, c2, c3 = st.sidebar.columns(3)
+    c1.metric("Deep", depths.count("deep"))
+    c2.metric("Surface", depths.count("surface"))
+    c3.metric("Skip", depths.count("skip"))
+    if result.errors:
+        st.sidebar.warning(f"{len(result.errors)} rallies failed to analyze")
+    return st.sidebar.multiselect(
+        "Show", ["deep", "surface", "skip"], default=["deep", "surface", "skip"],
+    )
+
+
+def render_video_panel(result: JobResult, source: str) -> None:
+    by_key = {(r.analysis.set_num, r.analysis.rally_id): r for r in result.rallies}
+    key = st.session_state.get("now_playing")
+    report = by_key.get(key) or result.rallies[0]
+    a = report.analysis
+    st.markdown(f"**Now playing** · Set {a.set_num} · Rally {a.rally_id} &nbsp;{pills(a)}", unsafe_allow_html=True)
+    st.video(source, start_time=int(report.start_time_sec))
+    st.caption(f"Jumps to the rally's first stroke ({int(report.start_time_sec // 60)}:{int(report.start_time_sec % 60):02d}). "
+               "Press ▶ on any rally to switch.")
+
+
+# ---- chat ------------------------------------------------------------------
+
+def run_live_analysis(match_id: str, set_num: int, rally_id: int, video: Path, result: JobResult) -> JobResult:
+    """Local mode only: run the agent on one rally and merge it into the result."""
+    from worker.agent.react_loop import analyze_match
+
+    traces: dict = {}
+    fresh = analyze_match(match_id, video, only={(set_num, rally_id)}, traces=traces)
+    if fresh.errors:
+        raise RuntimeError(fresh.errors[0].error)
+    st.session_state.setdefault("traces", {}).update(traces)
+    keep = [r for r in result.rallies if (r.analysis.set_num, r.analysis.rally_id) != (set_num, rally_id)]
+    merged = sorted(keep + fresh.rallies, key=lambda r: (r.analysis.set_num, r.analysis.rally_id))
+    return result.model_copy(update={"rallies": merged})
+
+
+def handle_prompt(prompt: str, result: JobResult, match_id: str, video: Path | None) -> JobResult:
+    from groq import RateLimitError
+
+    chat = st.session_state.chat
+    chat.append({"role": "user", "content": prompt})
+    cmd = ANALYZE_CMD.match(prompt)
+    try:
+        if cmd:
+            if video is None:
+                chat.append({"role": "assistant", "content": "Live analysis runs in local mode only; "
+                             "in AWS mode the worker analyzes the whole match."})
+                return result
+            rally_id, set_num = int(cmd.group(1)), int(cmd.group(2) or 1)
+            with st.spinner(f"Agent analyzing set {set_num}, rally {rally_id}…"):
+                result = run_live_analysis(match_id, set_num, rally_id, video, result)
+            st.session_state.now_playing = (set_num, rally_id)
+            chat.append({"role": "assistant", "content": f"Done — set {set_num}, rally {rally_id} is in the "
+                         "feed above with the agent's reasoning trace, and the video jumped to it."})
+        else:
+            with st.spinner("Thinking…"):
+                reply = answer(prompt, result, chat[:-1])
+            chat.append({"role": "assistant", "content": reply})
+    except RateLimitError:
+        chat.append({"role": "assistant", "content": "I've hit Groq's rate limit (shared with any other job "
+                     "using the same key). Give it a minute and ask again."})
+    except Exception as exc:  # surface failures in the chat instead of a stack trace
+        chat.append({"role": "assistant", "content": f"That didn't work: {exc}"})
+    return result
+
+
+def conversation(result: JobResult, match_id: str, video: Path | None, source: str) -> None:
+    st.session_state.setdefault("chat", [])
+    shown = render_sidebar_stats(result)
+
+    feed, side = st.columns([3, 2], gap="large")
+    with feed:
+        st.markdown(f"### {short_name(match_id)}")
+        st.caption("Each message is the agent's take on one rally. Ask a question below, "
+                   "or type **analyze rally 21** to watch the agent work live.")
+        traces = st.session_state.get("traces", {})
+        for report in result.rallies:
+            if report.analysis.depth in shown:
+                render_rally(report, traces.get((report.analysis.set_num, report.analysis.rally_id)))
+        for turn in st.session_state.chat:
+            with st.chat_message(turn["role"], avatar="🏸" if turn["role"] == "assistant" else "🙂"):
+                st.markdown(turn["content"])
+        if not st.session_state.chat:
+            st.markdown("<span class='sc-meta'>Try asking:</span>", unsafe_allow_html=True)
+            ideas = ["Where did B lose points?", "Summarize the match", "What should A change?"]
+            for col, idea in zip(st.columns(len(ideas)), ideas):
+                if col.button(idea, use_container_width=True):
+                    st.session_state.pending_prompt = idea
+    with side:
+        render_video_panel(result, source)
+
+    prompt = st.chat_input("Ask about this match, or type 'analyze rally 21'")
+    prompt = prompt or st.session_state.pop("pending_prompt", None)
+    if prompt:
+        st.session_state.result = handle_prompt(prompt, result, match_id, video)
+        st.rerun()
+
+
+# ---- modes -----------------------------------------------------------------
+
+def sidebar_header() -> None:
+    st.sidebar.markdown("## 🏸 ShuttleCast")
+    st.sidebar.caption("An AI agent that coaches every rally of a pro badminton match.")
+
+
+def pick_match(options: list[str]) -> str:
+    match_id = st.sidebar.selectbox("Match", options, format_func=short_name)
+    if st.session_state.get("match_id") != match_id:
+        for k in ("result", "chat", "traces", "now_playing", "job_id"):
+            st.session_state.pop(k, None)
+        st.session_state.match_id = match_id
+    return match_id
+
+
+def local_mode() -> None:
+    sidebar_header()
+    matches = verified_matches()
+    match_id = pick_match(list(matches))
+    video = REPO_ROOT / "data" / "videos" / matches[match_id]["file"]
+    if "result" not in st.session_state:
+        st.session_state.result = load_saved(match_id)
+    result = st.session_state.result
+    st.sidebar.caption("Local mode · agent runs on this machine")
+    if result is None or not result.rallies:
+        st.info("No saved analysis for this match yet. Run "
+                f"`python3 scripts/local_run.py --match-id {match_id} --max-rallies 10`, then reload.")
+        return
+    conversation(result, match_id, video, str(video))
+
 
 def aws_mode() -> None:
-    st.caption(f"Connected to {API_URL}")
-    matches = verified_match_urls()
-    with st.form("submit"):
-        match_id = st.selectbox("Match", list(matches))
-        submitted = st.form_submit_button("Analyze match")
-    if submitted:
-        resp = requests.post(
-            f"{API_URL}/jobs", json={"match_id": match_id, "youtube_url": matches[match_id]}, timeout=15,
-        )
+    sidebar_header()
+    matches = {m: v for m, v in verified_matches().items() if v["url"]}
+    match_id = pick_match(list(matches))
+    st.sidebar.caption("Connected to the AWS backend")
+    if st.sidebar.button("Analyze this match", type="primary", use_container_width=True):
+        resp = requests.post(f"{API_URL}/jobs", json={"match_id": match_id, "youtube_url": matches[match_id]["url"]},
+                             timeout=15)
         if resp.status_code != 202:
-            st.error(f"Submit failed ({resp.status_code}): {resp.text}")
-            return
-        st.session_state.job_id = resp.json()["job_id"]
-        st.session_state.pop("job_result", None)
-        st.query_params["job"] = st.session_state.job_id
+            st.sidebar.error(f"Submit failed ({resp.status_code}): {resp.text}")
+        else:
+            st.session_state.job_id = resp.json()["job_id"]
+            st.query_params["job"] = st.session_state.job_id
 
-    # a job_id in the URL survives a page refresh
     job_id = st.session_state.get("job_id") or st.query_params.get("job")
-    if not job_id:
-        return
-    st.session_state.job_id = job_id
-
-    if "job_result" in st.session_state:
-        result, youtube_url = st.session_state.job_result
-        render_job_result(result, youtube_url)
-        return
-    poll_job(job_id)
+    if "result" in st.session_state:
+        conversation(st.session_state.result, match_id, None, matches[match_id]["url"])
+    elif job_id:
+        st.session_state.job_id = job_id
+        poll_job(job_id)
+    else:
+        st.info("Pick a match and press **Analyze this match**. The worker analyzes every rally "
+                "asynchronously; results appear here as a conversation.")
 
 
 @st.fragment(run_every=5)
@@ -142,106 +306,15 @@ def poll_job(job_id: str) -> None:
         st.error(f"Status check failed ({resp.status_code}): {resp.text}")
         return
     job = resp.json()
-    status = job["status"]
-    if status == "complete":
-        result = JobResult(**requests.get(job["result_url"], timeout=30).json())
-        st.session_state.job_result = (result, job["youtube_url"])
+    if job["status"] == "complete":
+        st.session_state.result = JobResult(**requests.get(job["result_url"], timeout=30).json())
         st.rerun(scope="app")
-    elif status == "failed":
+    elif job["status"] == "failed":
         st.error(f"Job failed: {job.get('error')}")
     else:
         note = f" — {job['error']}" if job.get("error") else ""
-        st.info(f"Job `{job_id}` is **{status}**{note}. Checking every 5s…")
-
-
-# ---- local mode ----------------------------------------------------------
-
-def local_mode() -> None:
-    from worker.agent.react_loop import analyze_rally, build_agent
-    from worker.agent.tools import MatchState
-    from worker.pipeline.frame_extractor import get_video_fps
-    from worker.pipeline.ingest import load_match, verified_videos
-
-    st.caption("Local mode — set SHUTTLECAST_API_URL to use the AWS backend.")
-    videos = verified_videos()
-    if not videos:
-        st.error("No verified clips in data/videos/ — see data/verified_videos.json.")
-        return
-    match_id = st.selectbox("Match", list(videos))
-    video_path = videos[match_id]
-
-    saved = RESULTS_DIR / f"{match_id}.json"
-    view = "Interactive (per rally)"
-    if saved.exists():
-        view = st.radio("View", ["Saved full-match result", "Interactive (per rally)"], horizontal=True)
-    if view == "Saved full-match result":
-        render_job_result(JobResult(**json.loads(saved.read_text(encoding="utf-8"))), str(video_path))
-        return
-
-    # Match state lives in st.session_state, NOT @st.cache_resource: that
-    # cache is process-global, so it would share one score across every
-    # browser session and double-count on reload.
-    if st.session_state.get("match_id") != match_id:
-        st.session_state.match_id = match_id
-        st.session_state.match_state = MatchState(match_id=match_id)
-        st.session_state.agent = build_agent(st.session_state.match_state)
-        st.session_state.results = {}
-        st.session_state.traces = {}
-    state = st.session_state.match_state
-    agent = st.session_state.agent
-    rallies = load_match(match_id)
-    fps = get_video_fps(video_path)
-
-    col_list, col_main = st.columns([1, 2])
-    with col_list:
-        st.subheader(f"Rallies ({len(rallies)})")
-
-        def _label(i: int) -> str:
-            r = rallies[i]
-            done = "done" if (r.set_num, r.rally_id) in st.session_state.results else "pending"
-            return f"Set {r.set_num} / Rally {r.rally_id} — {len(r.strokes)} strokes, won by {r.rally_winner} [{done}]"
-
-        selected_idx = st.radio(
-            "Select a rally", range(len(rallies)), format_func=_label,
-            label_visibility="collapsed", key="rally_selector",
-        )
-
-    rally = rallies[selected_idx]
-    key = (rally.set_num, rally.rally_id)
-    with col_main:
-        st.subheader(f"Set {rally.set_num} / Rally {rally.rally_id}")
-        start_time = int(rally.strokes[0].frame_num / fps) if rally.strokes else 0
-        st.video(str(video_path), start_time=start_time)
-
-        if st.button("Analyze this rally"):
-            from groq import RateLimitError
-
-            try:
-                with st.spinner("Running ReAct agent (analyze_stroke_sequence -> ... -> generate_analysis)..."):
-                    result, messages = analyze_rally(agent, state, rally, video_path)
-            except RateLimitError:
-                # The 8000 tokens/min cap is per Groq account, not per process --
-                # a concurrent run (e.g. training/prepare_dataset.py) can starve
-                # this one past all its retries.
-                st.error(
-                    "Groq rate limit reached (8,000 tokens/min for the whole account). "
-                    "If another job is using the same key — e.g. training/prepare_dataset.py — "
-                    "wait for it to finish, or try again in a minute."
-                )
-            else:
-                st.session_state.results[key] = result
-                st.session_state.traces[key] = messages
-                # the sidebar label was drawn earlier in this same script pass,
-                # so it's stale until the next rerun -- force one now.
-                st.rerun()
-
-        if key in st.session_state.results:
-            # only counts rallies analyzed so far, in whatever order they were clicked
-            st.metric("Score (analyzed rallies)", f"{state.score_a} - {state.score_b}")
-            render_analysis(st.session_state.results[key])
-            render_trace(st.session_state.traces[key])
-        else:
-            st.info("Click \"Analyze this rally\" to run the agent on it.")
+        with st.chat_message("assistant", avatar="🏸"):
+            st.markdown(f"Working on it — job is **{job['status']}**{note}. This page updates by itself.")
 
 
 if API_URL:
