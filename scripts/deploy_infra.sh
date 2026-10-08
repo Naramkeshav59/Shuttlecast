@@ -36,7 +36,7 @@ overrides+=("VpcId=$VPC_ID" "SubnetIds=$SUBNETS")
 echo "Deploying stack $STACK to $AWS_DEFAULT_REGION (VPC $VPC_ID)..."
 aws cloudformation deploy \
   --stack-name "$STACK" \
-  --template-file "$REPO_ROOT/infra/template.yaml" \
+  --template-file "$(native "$REPO_ROOT/infra/template.yaml")" \
   --capabilities CAPABILITY_IAM \
   --no-fail-on-empty-changeset \
   --parameter-overrides "${overrides[@]}"

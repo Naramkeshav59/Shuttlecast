@@ -21,7 +21,7 @@ for name in intake status; do
   if [ "$name" = intake ]; then fn="$(stack_output IntakeFunctionName)"; else fn="$(stack_output StatusFunctionName)"; fi
   echo "Updating $fn"
   aws lambda update-function-code --function-name "$fn" \
-    --zip-file "fileb://$BUILD/$name.zip" >/dev/null
+    --zip-file "fileb://$(native "$BUILD/$name.zip")" >/dev/null
   aws lambda wait function-updated --function-name "$fn"
 done
 

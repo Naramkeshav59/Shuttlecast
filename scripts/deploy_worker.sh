@@ -17,7 +17,7 @@ for svc in worker ui; do
   if [ "$svc" = worker ]; then repo="$(stack_output WorkerRepositoryName)"; else repo="$(stack_output UiRepositoryName)"; fi
   image="$REGISTRY/$repo:$TAG"
   echo "Building $image"
-  docker build --platform linux/amd64 -f "$REPO_ROOT/$svc/Dockerfile" -t "$image" "$REPO_ROOT"
+  docker build --platform linux/amd64 -f "$(native "$REPO_ROOT/$svc/Dockerfile")" -t "$image" "$(native "$REPO_ROOT")"
   docker push "$image"
 done
 
