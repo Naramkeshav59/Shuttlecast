@@ -1,5 +1,5 @@
 {
-  "features": "pooled",
+  "features": "grid",
   "split": {
     "train": [
       "An_Se_Young_Pornpawee_Chochuwong_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
@@ -18,17 +18,17 @@
   },
   "n_train_strokes": 3815,
   "hit_detection_test": {
-    "precision": 0.8308457711442786,
+    "precision": 0.8851590106007067,
     "recall": 0.8820422535211268,
-    "f1": 0.8556789069171649,
-    "threshold": 0.35,
+    "f1": 0.8835978835978837,
+    "threshold": 0.65,
     "tolerance_sec": 0.15,
     "audio_onset_baseline_f1": 0.37
   },
   "shot_classification_test": {
-    "family_accuracy": 0.4481481611728668,
-    "family_balanced_accuracy": 0.4272494028603971,
-    "type_accuracy": 0.41296297311782837,
+    "family_accuracy": 0.5481481552124023,
+    "family_balanced_accuracy": 0.5495628824796432,
+    "type_accuracy": 0.46481481194496155,
     "n": 540,
     "majority_baseline_family_accuracy": 0.25555557012557983
   }

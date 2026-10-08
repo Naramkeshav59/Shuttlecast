@@ -26,6 +26,10 @@ SUGGESTION: A should have attacked with a sharp drop or a drive to the front
 
 ## What it demonstrates
 
+- **Works on any match video**: models trained on ShuttleSet's labelled
+  strokes detect and classify shots in a YouTube link or uploaded file
+  (hit-detection F1 0.84–0.87 on raw broadcast footage), so the agent
+  isn't limited to annotated matches.
 - **Multimodal**: structured stroke data (shot types, positions, landing
   zones) and broadcast frames processed together per rally, with ShuttleSet's
   `frame_num` driving frame extraction.
@@ -145,6 +149,41 @@ stroke frame landed on sponsor booths and close-ups. It's excluded in
 - *Decisions*: 7 deep, 10 surface, 3 skipped. Suggestion types skew
   heavily to `shot_selection` (16 of 17), so decision 3 needs more varied
   prompting to branch often.
+
+**Stroke recognition from any video** (`vision/`). ShuttleSet's labelled
+hit frames and shot types are used to train models that recover strokes
+from footage nobody annotated (a YouTube link or an uploaded file). The
+pipeline:
+
+1. Find the court by colour and crop to it.
+2. Extract frozen DINOv2 features, pooled to a 4×4 grid so player position
+   survives.
+3. Find hits with a temporal conv net.
+4. Group the hits into rallies by cadence.
+5. Classify each shot from the ~0.5s around the hit plus the flight time
+   to the next hit.
+
+The models are trained on 3,815 strokes from 6 matches; the threshold is
+tuned on a 7th; tests are on an 8th match never seen in training.
+
+| | Result | Baseline |
+| --- | --- | --- |
+| Hit detection F1 (±0.15s), rally windows + between-rally footage | **0.88** | 0.37 (audio onsets) |
+| Hit detection F1 on **raw broadcast** (two 5-min windows, replays included) | **0.84–0.87** | 0.67 before hard negatives |
+| Shot family accuracy (7 classes) at annotated hits | **54.8%** | 25.6% (majority class) |
+| Shot type accuracy (18 classes) | **46.5%** | — |
+
+What moved the numbers:
+
+- *Keeping where players are* (4×4 grid features instead of one averaged
+  vector) added +10 points on shot family.
+- *Using the flight time to the next hit* added +6 points.
+- *Training on between-rally footage as negatives*: before that, the
+  detector fired on slow-motion replays, and raw-footage precision was
+  0.49.
+
+End to end on raw video, shot-family accuracy is ~43–46%, because small
+timing errors shift what the classifier sees.
 
 **Fine-tuning** (Qwen2-VL-2B + QLoRA vs untuned baseline, held-out match):
 *not yet run.* The pipeline is smoke-tested end to end on CPU; the full run
