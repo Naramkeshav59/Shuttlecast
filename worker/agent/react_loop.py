@@ -95,9 +95,13 @@ def analyze_match(
     job_id: str | None = None,
     youtube_url: str | None = None,
     on_rally_done: Callable[[Rally], None] | None = None,
+    only: set[tuple[int, int]] | None = None,
 ) -> JobResult:
     """Run the agent over every rally of a match. Shared by the AWS worker
-    (worker/main.py) and scripts/local_run.py so there's one code path."""
+    (worker/main.py) and scripts/local_run.py so there's one code path.
+
+    `only` limits agent runs to those (set_num, rally_id) pairs; every other
+    rally's outcome is still replayed so running scores stay correct."""
     rallies = load_match(match_id)
     if max_rallies:
         rallies = rallies[:max_rallies]
@@ -109,6 +113,9 @@ def analyze_match(
     errors: list[RallyError] = []
 
     for rally in rallies:
+        if only is not None and (rally.set_num, rally.rally_id) not in only:
+            state.record_rally_outcome(rally.set_num, rally.rally_id, rally.rally_winner)
+            continue
         try:
             with timed("agent_rally", set_num=rally.set_num, rally_id=rally.rally_id):
                 result, _ = analyze_rally(agent, state, rally, video_path)

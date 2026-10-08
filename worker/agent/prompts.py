@@ -23,6 +23,10 @@ Stroke sequence and outcome:
 Match context:
 {context}
 
+Outcome: player {winner} won this rally, so the decisive error belongs to \
+player {loser}. Analyze player {loser}'s play, and name player {loser} in the \
+PATTERN.
+
 Analysis depth: {depth}
 
 Respond in exactly this format, nothing else:
@@ -40,6 +44,10 @@ Stroke sequence and outcome:
 Match context:
 {context}
 
+Outcome: player {winner} won this rally, so the decisive error belongs to \
+player {loser}. Analyze player {loser}'s play, and name player {loser} in the \
+PATTERN.
+
 Analysis depth: {depth}
 
 Respond in exactly this format, nothing else:
@@ -56,6 +64,10 @@ Stroke sequence and outcome:
 
 Match context:
 {context}
+
+Outcome: player {winner} won this rally, so the decisive error belongs to \
+player {loser}. Analyze player {loser}'s play, and name player {loser} in the \
+PATTERN.
 
 Analysis depth: {depth}
 
@@ -76,27 +88,21 @@ match one rally at a time. For each rally you are given its stroke-by-stroke \
 ShuttleSet data and the extracted broadcast frames. Follow this exact tool \
 sequence -- do not write your own tactical note, and do not skip a step:
 
-1. Call analyze_stroke_sequence to get the rally's stroke data. This dict is \
-your "observation" for every later step -- pass it forward exactly as \
-returned, verbatim, with every key it had. Never reformat it, summarize it, \
-rename its keys, or reconstruct your own version of it.
+1. Call analyze_stroke_sequence to read the rally's stroke data.
 2. Call analyze_frame_group with a specific question if the stroke data alone \
 leaves the tactical cause ambiguous (decision point: visual-stroke \
 consistency check). If the stroke data already makes the cause clear, skip \
 this call rather than asking a vague question.
-3. Call assess_rally_significance with that same unmodified observation dict \
-and the rally's outcome. If it returns 'skip', stop here and reply with one \
-sentence saying no analysis was warranted, and why -- do not call \
-generate_analysis. If it returns an error, you passed the wrong thing --
-go back and pass the exact dict from step 1.
+3. Call assess_rally_significance. If it returns 'skip', stop here and reply \
+with one sentence saying no analysis was warranted, and why -- do not call \
+generate_analysis.
 4. Call get_match_context.
 5. Decide which suggestion_type best fits -- positioning, shot_selection, or \
 pattern_exploitation (decision point: suggestion type selection) -- based on \
 what actually went wrong in this rally.
-6. Call generate_analysis with the same unmodified observation, the match \
-context, the depth from step 3, and your chosen suggestion_type. Its return \
-value is your final answer -- return it verbatim, do not paraphrase or \
-rewrite it.
+6. Call generate_analysis with the depth from step 3 and your chosen \
+suggestion_type. Its return value is your final answer -- return it \
+verbatim, do not paraphrase or rewrite it.
 
-Ground every tool argument in the specific data for this rally -- never \
-invent stroke data you were not given."""
+The tools already have this rally's data; you never need to pass stroke data \
+yourself. Base every decision on what the tools return for this rally."""

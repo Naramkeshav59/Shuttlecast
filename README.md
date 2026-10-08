@@ -15,9 +15,9 @@ of analysts.
 ```text
 Set 1 / Rally 2 — won by B                                   depth: surface
 [Action]      analyze_stroke_sequence()            -> 4 strokes: unknown, clear, clear, wrist smash
-[Action]      assess_rally_significance(obs, "B")  -> surface
+[Action]      assess_rally_significance()          -> surface
 [Action]      get_match_context()                  -> score 0-0, no history
-[Action]      generate_analysis(..., suggestion_type="shot_selection")
+[Action]      generate_analysis(depth="surface", suggestion_type="shot_selection")
 PATTERN:    A's third-shot clear was suboptimal — it gave B time to reset and
             unleash a winning wrist smash.
 SUGGESTION: A should have attacked with a sharp drop or a drive to the front
@@ -102,10 +102,11 @@ flowchart TD
 3. **Suggestion type.** The agent picks `positioning`, `shot_selection` or
    `pattern_exploitation`, and each maps to its own prompt template.
 
-The tools read the current rally's raw stroke data and frames from bound
-state instead of taking them as arguments. Making a model reproduce dozens
-of stroke fields verbatim inside a tool call is fragile; the tools only take
-what the agent itself computes (its observation, depth and chosen type).
+The tools read the current rally's stroke data and frames from bound
+state instead of taking them as arguments. An earlier version had the model
+pass the stroke summary back into later tool calls, and 4 of 20 rallies
+failed with malformed JSON. Now tool arguments carry only the agent's own
+decisions (the vision question, depth, and suggestion type).
 
 ## Results (measured)
 
@@ -128,6 +129,22 @@ its annotations, and visually verified with `scripts/verify_alignment.py`.
 One download had the right fps but was a different YouTube edit, and every
 stroke frame landed on sponsor booths and close-ups. It's excluded in
 [`data/verified_videos.json`](data/verified_videos.json).
+
+**Agent analysis**: the first 20 rallies of An Se Young vs Pornpawee Chochuwong (Thailand Open 2021).
+
+- *Reliability*: 4 of 20 rallies first failed because the model emitted
+  malformed JSON while copying stroke data into tool arguments. After
+  moving rally data out of tool arguments, 20 of 20 succeeded.
+- *Tactical accuracy*: does the analysis blame the player who lost? It was
+  62.5% at first, and the eval showed why: the model critiqued player B
+  even in rallies B won. Stating the winner and loser in the generation
+  prompt raised it to **93.8%** (15 of 16 analyzed rallies). That's an A/B
+  with each rally's agent decisions held fixed (`scripts/ablate_generation_prompt.py`).
+  Caveat: one match, 16 rallies, and the metric checks attribution, not
+  the quality of the advice.
+- *Decisions*: 7 deep, 10 surface, 3 skipped. Suggestion types skew
+  heavily to `shot_selection` (16 of 17), so decision 3 needs more varied
+  prompting to branch often.
 
 **Fine-tuning** (Qwen2-VL-2B + QLoRA vs untuned baseline, held-out match):
 *not yet run.* The pipeline is smoke-tested end to end on CPU; the full run

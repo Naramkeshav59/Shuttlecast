@@ -6,6 +6,7 @@ the Streamlit UI can load in local mode.
     python3 scripts/local_run.py --list
 """
 import argparse
+import json
 import sys
 import time
 from pathlib import Path
@@ -17,6 +18,7 @@ from dotenv import load_dotenv  # noqa: E402
 
 load_dotenv(REPO_ROOT / ".env")
 
+from shared.models import JobResult  # noqa: E402
 from worker.agent.react_loop import analyze_match  # noqa: E402
 from worker.pipeline.ingest import verified_videos  # noqa: E402
 
@@ -28,6 +30,8 @@ def main() -> None:
     parser.add_argument("--match-id")
     parser.add_argument("--max-rallies", type=int, default=None)
     parser.add_argument("--list", action="store_true", help="list matches with a verified local clip")
+    parser.add_argument("--retry-failed", action="store_true",
+                        help="re-run only the rallies that failed in the saved result, and merge")
     args = parser.parse_args()
 
     videos = verified_videos()
@@ -47,12 +51,31 @@ def main() -> None:
         print(f"  [{done}] set {rally.set_num} rally {rally.rally_id} ({time.time() - started:.0f}s)",
               file=sys.stderr)
 
-    result = analyze_match(
-        args.match_id, videos[args.match_id], max_rallies=args.max_rallies, on_rally_done=progress,
-    )
-
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     out = RESULTS_DIR / f"{args.match_id}.json"
+
+    previous = None
+    only = None
+    if args.retry_failed:
+        if not out.exists():
+            sys.exit(f"--retry-failed: no previous result at {out}")
+        previous = JobResult(**json.loads(out.read_text(encoding="utf-8")))
+        only = {(e.set_num, e.rally_id) for e in previous.errors}
+        if not only:
+            print("no failed rallies to retry")
+            return
+
+    result = analyze_match(
+        args.match_id, videos[args.match_id], max_rallies=args.max_rallies,
+        on_rally_done=progress, only=only,
+    )
+
+    if previous is not None:
+        # keep the earlier successes, swap in the retried rallies
+        reports = previous.rallies + result.rallies
+        reports.sort(key=lambda r: (r.analysis.set_num, r.analysis.rally_id))
+        result = previous.model_copy(update={"rallies": reports, "errors": result.errors})
+
     out.write_text(result.model_dump_json(indent=2), encoding="utf-8")
     print(f"{len(result.rallies)} rallies analyzed, {len(result.errors)} failed -> {out}")
 

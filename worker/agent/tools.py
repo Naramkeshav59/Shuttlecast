@@ -13,11 +13,11 @@ Deliberate deviations from the original tool design:
     verbatim as a tool call argument -- fragile and
     wasteful for data it never needs to see raw, only summarized. Instead
     react_loop.py calls state.set_current_rally(...) before invoking the
-    agent for each rally, and these two tools read from that closure.
-    observation/context/outcome/depth/suggestion_type stay as real
-    arguments because those ARE things the agent itself computes across
-    steps and has to thread forward -- data it just saw, not data it
-    would have to invent.
+    agent for each rally, and every tool reads rally data from that
+    closure. The same applies to assess_rally_significance and
+    generate_analysis: having the model echo the observation dict back
+    as JSON failed on 4 of 20 rallies. Only the agent's own decisions
+    (depth, suggestion_type, the vision question) are arguments.
   - generate_analysis takes an explicit suggestion_type argument. Decision
     point 3 (suggestion type) has the *agent* choose positioning/shot_selection/
     pattern_exploitation before calling generate_analysis -- for the LLM to
@@ -88,6 +88,16 @@ def _parse_pattern_suggestion(text: str) -> tuple[str, str]:
     return tactical_pattern, suggestion_text
 
 
+def build_generation_prompt(observation: dict, context: dict, depth: str, suggestion_type: str) -> str:
+    """Without the explicit winner/loser line, the model critiqued player B
+    even in rallies B won (tactical accuracy 62.5% on 20 rallies)."""
+    winner = observation.get("rally_winner")
+    loser = {"A": "B", "B": "A"}.get(winner, "who lost")
+    return SUGGESTION_PROMPTS[suggestion_type].format(
+        observation=observation, context=context, depth=depth, winner=winner, loser=loser,
+    )
+
+
 def build_tools(state: MatchState) -> list:
     """Return the 5 tools bound to `state`, ready to hand to a LangChain agent."""
 
@@ -107,27 +117,38 @@ def build_tools(state: MatchState) -> list:
             response = client.models.generate_content(model=GEMINI_MODEL, contents=parts)
         return response.text
 
+    # Rally data is read from `state`, never passed through tool arguments:
+    # making the model re-emit the stroke dict as JSON failed on 4 of 20
+    # rallies (Groq 400 "failed to parse tool call arguments"). Tool
+    # arguments carry only what the agent decides.
+    def _observation() -> dict:
+        return summarize_strokes(state.current_rally.strokes if state.current_rally else [])
+
+    def _match_context() -> dict:
+        return {
+            "match_id": state.match_id,
+            "score_a": state.score_a,
+            "score_b": state.score_b,
+            "rallies_analyzed": len(state.analysis_history),
+            "recent_suggestions": [
+                r.suggestion_text for r in state.analysis_history[-3:] if r.suggestion_text
+            ],
+        }
+
     @tool
     def analyze_stroke_sequence() -> dict:
         """Summarize ShuttleSet stroke metadata for the current rally: shot
         sequence, positions, landing zones, and rally outcome."""
-        return summarize_strokes(state.current_rally.strokes if state.current_rally else [])
+        return _observation()
 
     @tool
-    def assess_rally_significance(observation: dict, outcome: str) -> str:
-        """Decide if a rally warrants deep analysis or a brief note.
+    def assess_rally_significance() -> str:
+        """Decide if the current rally warrants deep analysis or a brief note.
         Returns 'deep' | 'surface' | 'skip'. A first-pass heuristic the
-        agent's own reasoning can accept or override in later Thought steps.
-        `observation` must be the exact dict returned by
-        analyze_stroke_sequence -- do not reformat or summarize it first."""
-        if "rally_length" not in observation or "shot_sequence" not in observation:
-            return (
-                "error: observation is missing 'rally_length' and/or "
-                "'shot_sequence'. Pass the exact dict analyze_stroke_sequence "
-                "returned, not a reformatted summary."
-            )
-        rally_length = observation["rally_length"]
-        shot_sequence = observation["shot_sequence"]
+        agent's own reasoning can accept or override in later Thought steps."""
+        obs = _observation()
+        rally_length = obs["rally_length"]
+        shot_sequence = obs["shot_sequence"]
         if rally_length <= 3:
             return "skip"
         if len(shot_sequence) >= 2 and shot_sequence[-1] == shot_sequence[-2]:
@@ -140,27 +161,16 @@ def build_tools(state: MatchState) -> list:
     def get_match_context() -> dict:
         """Return current score and recent analysis history for the match
         being processed."""
-        return {
-            "match_id": state.match_id,
-            "score_a": state.score_a,
-            "score_b": state.score_b,
-            "rallies_analyzed": len(state.analysis_history),
-            "recent_suggestions": [
-                r.suggestion_text for r in state.analysis_history[-3:] if r.suggestion_text
-            ],
-        }
+        return _match_context()
 
     @tool
     def generate_analysis(
-        observation: dict,
-        context: dict,
         depth: Literal["deep", "surface", "skip"],
         suggestion_type: Literal["positioning", "shot_selection", "pattern_exploitation"],
     ) -> str:
         """Call Groq to generate tactical analysis + improvement suggestion
-        for the given depth and suggestion_type."""
-        template = SUGGESTION_PROMPTS[suggestion_type]
-        prompt = template.format(observation=observation, context=context, depth=depth)
+        for the current rally at the given depth and suggestion_type."""
+        prompt = build_generation_prompt(_observation(), _match_context(), depth, suggestion_type)
         # this call shares the same account-wide 8000 TPM cap (on Groq's free
         # on_demand tier) as the ReAct loop's own LLM calls, so it hits 429s
         # too; the SDK's own max_retries (default 2) backs off automatically.

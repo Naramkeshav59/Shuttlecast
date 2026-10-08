@@ -1,0 +1,329 @@
+{
+  "job_id": null,
+  "match_id": "An_Se_Young_Pornpawee_Chochuwong_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
+  "youtube_url": null,
+  "fps": 30.0,
+  "rallies": [
+    {
+      "analysis": {
+        "match_id": "An_Se_Young_Pornpawee_Chochuwong_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
+        "set_num": 1,
+        "rally_id": 1,
+        "depth": "deep",
+        "tactical_pattern": "B’s cross‑court net shot was suboptimal because it was a passive, high‑trajectory net play that gave A enough time to lift the shuttle and finish the rally.",
+        "suggestion_type": "shot_selection",
+        "suggestion_text": "B should have attacked the net with a low, tight net‑kill or aggressive net‑drive straight down the line, forcing a weak return or outright error."
+      },
+      "start_time_sec": 347.26666666666665,
+      "rally_winner": "A",
+      "n_strokes": 8,
+      "score_a": 1,
+      "score_b": 0
+    },
+    {
+      "analysis": {
+        "match_id": "An_Se_Young_Pornpawee_Chochuwong_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
+        "set_num": 1,
+        "rally_id": 2,
+        "depth": "surface",
+        "tactical_pattern": "A’s third‑shot clear was suboptimal because it was a defensive, high clear that left the shuttle ripe for B’s wrist smash.",
+        "suggestion_type": "shot_selection",
+        "suggestion_text": "A should have seized the initiative with a low, aggressive drop or a steep front‑court drive, forcing B into a weak return and denying the smash opportunity."
+      },
+      "start_time_sec": 370.96666666666664,
+      "rally_winner": "B",
+      "n_strokes": 4,
+      "score_a": 1,
+      "score_b": 1
+    },
+    {
+      "analysis": {
+        "match_id": "An_Se_Young_Pornpawee_Chochuwong_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
+        "set_num": 1,
+        "rally_id": 3,
+        "depth": "deep",
+        "tactical_pattern": "B consistently stayed too far forward in the centre of the court after A’s attacks, never re‑establishing a deep rear‑court base before attempting smashes or clears.",
+        "suggestion_type": "positioning",
+        "suggestion_text": "B should retreat immediately after each defensive return to a balanced back‑court position (centered near the baseline, about 200 cm behind the short service line) and only step forward to attack, ensuring better coverage and a stronger platform for offensive shots."
+      },
+      "start_time_sec": 388.73333333333335,
+      "rally_winner": "A",
+      "n_strokes": 18,
+      "score_a": 2,
+      "score_b": 1
+    },
+    {
+      "analysis": {
+        "match_id": "An_Se_Young_Pornpawee_Chochuwong_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
+        "set_num": 1,
+        "rally_id": 4,
+        "depth": "surface",
+        "tactical_pattern": "B’s fourth‑shot drop was suboptimal because it landed too close to the net, allowing A to step in and execute a powerful lift/smash to win the rally.",
+        "suggestion_type": "shot_selection",
+        "suggestion_text": "From that position B should have played a low, aggressive net‑kill or a steep front‑court drive straight down the line, forcing a weak return or outright error from A."
+      },
+      "start_time_sec": 424.23333333333335,
+      "rally_winner": "A",
+      "n_strokes": 4,
+      "score_a": 3,
+      "score_b": 1
+    },
+    {
+      "analysis": {
+        "match_id": "An_Se_Young_Pornpawee_Chochuwong_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
+        "set_num": 1,
+        "rally_id": 5,
+        "depth": "skip",
+        "tactical_pattern": null,
+        "suggestion_type": null,
+        "suggestion_text": null
+      },
+      "start_time_sec": 453.03333333333336,
+      "rally_winner": "B",
+      "n_strokes": 3,
+      "score_a": 3,
+      "score_b": 2
+    },
+    {
+      "analysis": {
+        "match_id": "An_Se_Young_Pornpawee_Chochuwong_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
+        "set_num": 1,
+        "rally_id": 6,
+        "depth": "deep",
+        "tactical_pattern": "A’s cross‑court net shot on rally step 9 was suboptimal, as it was executed from a deep, defensive position and floated over the net, allowing B to easily push the shuttle back and seize the offensive initiative.",
+        "suggestion_type": "shot_selection",
+        "suggestion_text": "A should have stepped forward and played a low, aggressive front‑court drive or a net‑kill straight down the line, forcing a weak return and maintaining the attack."
+      },
+      "start_time_sec": 470.26666666666665,
+      "rally_winner": "B",
+      "n_strokes": 18,
+      "score_a": 3,
+      "score_b": 3
+    },
+    {
+      "analysis": {
+        "match_id": "An_Se_Young_Pornpawee_Chochuwong_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
+        "set_num": 1,
+        "rally_id": 7,
+        "depth": "surface",
+        "tactical_pattern": "A’s choice to hit a high, mid‑court smash on the fourth shot was suboptimal, as it left the shuttle at a comfortable height and position for B to recover and execute a winning cross‑court net shot.",
+        "suggestion_type": "shot_selection",
+        "suggestion_text": "A should have stepped forward and played a low, aggressive front‑court drive or straight‑line net‑kill, targeting the sideline to force a weak return or error."
+      },
+      "start_time_sec": 509.8666666666667,
+      "rally_winner": "B",
+      "n_strokes": 5,
+      "score_a": 3,
+      "score_b": 4
+    },
+    {
+      "analysis": {
+        "match_id": "An_Se_Young_Pornpawee_Chochuwong_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
+        "set_num": 1,
+        "rally_id": 8,
+        "depth": "surface",
+        "tactical_pattern": "A’s defensive net shot after B’s low return net was suboptimal because it gave B an easy opportunity to attack and win the rally.",
+        "suggestion_type": "shot_selection",
+        "suggestion_text": "A should have executed an aggressive, low net‑kill or a steep front‑court drive straight down the line, forcing a weak return or error from B."
+      },
+      "start_time_sec": 542.2666666666667,
+      "rally_winner": "B",
+      "n_strokes": 4,
+      "score_a": 3,
+      "score_b": 5
+    },
+    {
+      "analysis": {
+        "match_id": "An_Se_Young_Pornpawee_Chochuwong_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
+        "set_num": 1,
+        "rally_id": 9,
+        "depth": "surface",
+        "tactical_pattern": "Pornpawee Chochuwong’s decision to hit a high, deep smash from the backcourt was suboptimal because it left the shuttle at a comfortable height and distance for An Se‑Young to launch a strong counter‑attack.",
+        "suggestion_type": "shot_selection",
+        "suggestion_text": "From that position she should have played a low, aggressive front‑court drive or a steep net‑kill straight down the line to finish the point or force a weak return."
+      },
+      "start_time_sec": 564.6666666666666,
+      "rally_winner": "A",
+      "n_strokes": 5,
+      "score_a": 4,
+      "score_b": 5
+    },
+    {
+      "analysis": {
+        "match_id": "An_Se_Young_Pornpawee_Chochuwong_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
+        "set_num": 1,
+        "rally_id": 10,
+        "depth": "surface",
+        "tactical_pattern": "Player B’s choice to play a defensive clear from a front‑court position after A’s push was suboptimal, as it gave A time to recover and execute a winning drop.",
+        "suggestion_type": "shot_selection",
+        "suggestion_text": "From that spot B should have attacked with a low, aggressive front‑court drive or a straight‑line net‑kill, targeting the sideline to force a weak return or finish the rally."
+      },
+      "start_time_sec": 588.6666666666666,
+      "rally_winner": "A",
+      "n_strokes": 5,
+      "score_a": 5,
+      "score_b": 5
+    },
+    {
+      "analysis": {
+        "match_id": "An_Se_Young_Pornpawee_Chochuwong_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
+        "set_num": 1,
+        "rally_id": 11,
+        "depth": "skip",
+        "tactical_pattern": null,
+        "suggestion_type": null,
+        "suggestion_text": null
+      },
+      "start_time_sec": 623.7666666666667,
+      "rally_winner": "B",
+      "n_strokes": 3,
+      "score_a": 5,
+      "score_b": 6
+    },
+    {
+      "analysis": {
+        "match_id": "An_Se_Young_Pornpawee_Chochuwong_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
+        "set_num": 1,
+        "rally_id": 12,
+        "depth": "deep",
+        "tactical_pattern": "B’s choice to play a tentative net shot on rally shot 11 after A’s smash was suboptimal, because it gave A a weak return that set up the winning wrist‑smash.",
+        "suggestion_type": "shot_selection",
+        "suggestion_text": "B should have responded with a defensive lift (or a low, aggressive front‑court drive) to the backcourt, regaining a solid defensive position and denying A the opportunity to finish the point."
+      },
+      "start_time_sec": 644.7666666666667,
+      "rally_winner": "A",
+      "n_strokes": 13,
+      "score_a": 6,
+      "score_b": 6
+    },
+    {
+      "analysis": {
+        "match_id": "An_Se_Young_Pornpawee_Chochuwong_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
+        "set_num": 1,
+        "rally_id": 13,
+        "depth": "deep",
+        "tactical_pattern": "B’s choice to play a defensive lob on the final shot from a relatively forward position handed A a clean attacking opportunity, resulting in the rally loss.",
+        "suggestion_type": "shot_selection",
+        "suggestion_text": "From that spot B should have executed a low, aggressive front‑court drive or a steep net‑kill down the line to finish the point or force a weak return."
+      },
+      "start_time_sec": 678.1333333333333,
+      "rally_winner": "A",
+      "n_strokes": 16,
+      "score_a": 7,
+      "score_b": 6
+    },
+    {
+      "analysis": {
+        "match_id": "An_Se_Young_Pornpawee_Chochuwong_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
+        "set_num": 1,
+        "rally_id": 14,
+        "depth": "skip",
+        "tactical_pattern": null,
+        "suggestion_type": null,
+        "suggestion_text": null
+      },
+      "start_time_sec": 714.6,
+      "rally_winner": "A",
+      "n_strokes": 3,
+      "score_a": 8,
+      "score_b": 6
+    },
+    {
+      "analysis": {
+        "match_id": "An_Se_Young_Pornpawee_Chochuwong_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
+        "set_num": 1,
+        "rally_id": 15,
+        "depth": "surface",
+        "tactical_pattern": "B’s choice to play a high clear after A’s lob was suboptimal, as it left the shuttle easy to attack and handed A the initiative to finish the point.",
+        "suggestion_type": "shot_selection",
+        "suggestion_text": "B should have responded with a low, aggressive front‑court drive or a steep net‑kill down the line, turning the defence into an offensive shot that could have ended the rally or forced a weak return."
+      },
+      "start_time_sec": 743.3666666666667,
+      "rally_winner": "A",
+      "n_strokes": 6,
+      "score_a": 9,
+      "score_b": 6
+    },
+    {
+      "analysis": {
+        "match_id": "An_Se_Young_Pornpawee_Chochuwong_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
+        "set_num": 1,
+        "rally_id": 16,
+        "depth": "surface",
+        "tactical_pattern": "Player B’s decision to hit a high lob after A’s drop was suboptimal, as it lifted the shuttle into the backcourt and gave A an easy attacking opportunity.",
+        "suggestion_type": "shot_selection",
+        "suggestion_text": "B should have responded with a defensive lift (or a low, aggressive front‑court drive) to keep the shuttle low, regain a solid defensive position and force A into a weaker return."
+      },
+      "start_time_sec": 765.2666666666667,
+      "rally_winner": "A",
+      "n_strokes": 4,
+      "score_a": 10,
+      "score_b": 6
+    },
+    {
+      "analysis": {
+        "match_id": "An_Se_Young_Pornpawee_Chochuwong_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
+        "set_num": 1,
+        "rally_id": 17,
+        "depth": "deep",
+        "tactical_pattern": "B’s final push from the forecourt was a passive, high shuttle that gave A an easy attacking opportunity, resulting in the loss of the rally.",
+        "suggestion_type": "shot_selection",
+        "suggestion_text": "From that position B should have hit a low, aggressive front‑court drive or a steep net‑kill down the line to finish the point or force a weak return."
+      },
+      "start_time_sec": 786.4666666666667,
+      "rally_winner": "A",
+      "n_strokes": 14,
+      "score_a": 11,
+      "score_b": 6
+    },
+    {
+      "analysis": {
+        "match_id": "An_Se_Young_Pornpawee_Chochuwong_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
+        "set_num": 1,
+        "rally_id": 18,
+        "depth": "surface",
+        "tactical_pattern": "A’s decision to play a soft return net after B’s smash was suboptimal, as it left the shuttle high and vulnerable, allowing B to finish the point.",
+        "suggestion_type": "shot_selection",
+        "suggestion_text": "A should have responded with a defensive lift or a low, aggressive front‑court drive to keep the shuttle low, regain court balance, and force B into a weaker return."
+      },
+      "start_time_sec": 878.8,
+      "rally_winner": "B",
+      "n_strokes": 5,
+      "score_a": 11,
+      "score_b": 7
+    },
+    {
+      "analysis": {
+        "match_id": "An_Se_Young_Pornpawee_Chochuwong_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
+        "set_num": 1,
+        "rally_id": 19,
+        "depth": "deep",
+        "tactical_pattern": "At shot 11, Player A’s drop landed too deep and high (≈ 432 × 404 mm), giving Player B ample time to lift the shuttle to the backcourt and set up a winning wrist‑smash.",
+        "suggestion_type": "shot_selection",
+        "suggestion_text": "A should have played a tight, low net‑drop (or a sharp front‑court drive) that lands just over the net, forcing B into a weak lift or defensive return and preserving the attacking advantage."
+      },
+      "start_time_sec": 904.9666666666667,
+      "rally_winner": "B",
+      "n_strokes": 16,
+      "score_a": 11,
+      "score_b": 8
+    },
+    {
+      "analysis": {
+        "match_id": "An_Se_Young_Pornpawee_Chochuwong_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
+        "set_num": 1,
+        "rally_id": 20,
+        "depth": "surface",
+        "tactical_pattern": "A's second net shot was suboptimal because it was a passive, relatively high net play that left the shuttle easy for B to attack with a rush.",
+        "suggestion_type": "shot_selection",
+        "suggestion_text": "A should have hit a low, aggressive front‑court drive or a steep net‑kill down the line to keep the shuttle low and force a weak return, denying B the opportunity to smash."
+      },
+      "start_time_sec": 952.3333333333334,
+      "rally_winner": "B",
+      "n_strokes": 5,
+      "score_a": 11,
+      "score_b": 9
+    }
+  ],
+  "errors": []
+}
