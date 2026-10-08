@@ -109,6 +109,27 @@ class StrokeRecognizer:
         cap.release()
         return np.concatenate(feats) if feats else np.zeros((0, self.ckpt["dim"]), np.float32)
 
+    def _court_box(self, video: Path, segments: list[tuple[int, int]], stride: int, n: int = 30):
+        """Estimate the crop only from frames INSIDE court-view stretches.
+        Sampling at fixed intervals picked up wide shots and graphics with
+        green in them, which inflated the box (x 22-1191 vs 158-1123 in
+        training) -- a different crop than the models learned from, and
+        zero detections on a short clip."""
+        picks = []
+        total = sum(e - s for s, e in segments)
+        for s, e in segments:  # spread n samples across segments by length
+            k = max(1, round(n * (e - s) / total))
+            picks += [int(s + (e - s) * (i + 0.5) / k) for i in range(k)]
+        cap = cv2.VideoCapture(str(video))
+        frames = []
+        for f in picks:
+            cap.set(cv2.CAP_PROP_POS_FRAMES, f * stride)
+            ok, img = cap.read()
+            if ok:
+                frames.append(img)
+        cap.release()
+        return stable_court_box(frames)
+
     def run(self, video: Path, match_id: str | None = None, max_minutes: float | None = None,
             progress=None) -> tuple[list[DetectedRally], float]:
         torch, ck = self.torch, self.ckpt
@@ -121,7 +142,7 @@ class StrokeRecognizer:
 
         # pass 1: just measure "is the main court on screen" per sampled frame.
         # Holding decoded frames would need ~12 GB for 10 minutes of 720p.
-        ratios, samples, idx = [], [], 0
+        ratios, idx = [], 0
         while idx < limit:
             ok, f = cap.read()
             if not ok:
@@ -129,15 +150,13 @@ class StrokeRecognizer:
             if idx % stride == 0:
                 r = _green_ratio(f)
                 ratios.append(r)
-                if r > COURT_VIEW_RATIO and len(ratios) % 60 == 0 and len(samples) < 40:
-                    samples.append(f)
                 if progress and len(ratios) % 500 == 0:
                     progress(f"scanned {len(ratios) / eff_fps / 60:.1f} min of video", min(0.3, 0.3 * idx / max(1, limit)))
             idx += 1
         cap.release()
         court_view = np.convolve(np.array(ratios) > COURT_VIEW_RATIO, np.ones(9) / 9, mode="same") > 0.5
         segments = _segments(court_view, int(MIN_SEGMENT_SEC * eff_fps))
-        box = stable_court_box(samples)
+        box = self._court_box(video, segments, stride)
         if not segments or box is None:
             return [], fps
 
