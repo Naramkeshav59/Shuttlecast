@@ -14,6 +14,8 @@ venv/
 # Data not committed to the repo
 data/videos/
 data/training/
+data/uploads/
+data/vision/
 
 # Model artifacts
 *.safetensors

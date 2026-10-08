@@ -23,9 +23,7 @@ Stroke sequence and outcome:
 Match context:
 {context}
 
-Outcome: player {winner} won this rally, so the decisive error belongs to \
-player {loser}. Analyze player {loser}'s play, and name player {loser} in the \
-PATTERN.
+{outcome}
 
 Analysis depth: {depth}
 
@@ -44,9 +42,7 @@ Stroke sequence and outcome:
 Match context:
 {context}
 
-Outcome: player {winner} won this rally, so the decisive error belongs to \
-player {loser}. Analyze player {loser}'s play, and name player {loser} in the \
-PATTERN.
+{outcome}
 
 Analysis depth: {depth}
 
@@ -65,9 +61,7 @@ Stroke sequence and outcome:
 Match context:
 {context}
 
-Outcome: player {winner} won this rally, so the decisive error belongs to \
-player {loser}. Analyze player {loser}'s play, and name player {loser} in the \
-PATTERN.
+{outcome}
 
 Analysis depth: {depth}
 

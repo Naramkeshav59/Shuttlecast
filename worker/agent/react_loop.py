@@ -59,8 +59,9 @@ def analyze_rally(agent, state: MatchState, rally: Rally, video_path: Path) -> t
         f"Analyze rally {rally.rally_id} of set {rally.set_num} "
         f"(match {rally.match_id}). {len(rally.strokes)} strokes were played; "
         f"{len(frame_paths)} broadcast frames were extracted at each stroke's "
-        f"timestamp for visual analysis. The rally was won by player "
-        f"{rally.rally_winner}."
+        f"timestamp for visual analysis. "
+        + (f"The rally was won by player {rally.rally_winner}." if rally.rally_winner
+           else "The rally's winner isn't known (strokes were detected from video).")
     )
     output = agent.invoke({"messages": [{"role": "user", "content": task}]})
     messages = output["messages"]
@@ -108,7 +109,27 @@ def analyze_match(
     if max_rallies:
         rallies = rallies[:max_rallies]
     fps = check_fps_alignment(video_path, expected_fps(match_id))
+    return analyze_rallies(
+        match_id, rallies, video_path, fps, job_id=job_id, youtube_url=youtube_url,
+        on_rally_done=on_rally_done, only=only, traces=traces,
+    )
 
+
+def analyze_rallies(
+    match_id: str,
+    rallies: list[Rally],
+    video_path: Path,
+    fps: float,
+    *,
+    job_id: str | None = None,
+    youtube_url: str | None = None,
+    on_rally_done: Callable[[Rally], None] | None = None,
+    only: set[tuple[int, int]] | None = None,
+    traces: dict | None = None,
+) -> JobResult:
+    """The per-rally agent loop, for rallies from any source: ShuttleSet
+    annotations (analyze_match) or strokes detected in an uploaded video
+    (vision/infer.py)."""
     state = MatchState(match_id=match_id)
     agent = build_agent(state)
     reports: list[RallyReport] = []

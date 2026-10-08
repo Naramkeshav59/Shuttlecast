@@ -20,5 +20,31 @@
     "file": "CHOU_Tien_Chen_Jonatan_CHRISTIE_Sudirman_Cup_2019_Quarter-finals.mp4",
     "aligned": false,
     "note": "Current YouTube upload is a different edit: 49.2 min long vs a 35.7 min annotated span; stroke frames land on venue, coach and close-up shots. Needs a time offset (or the original upload) before use."
+  },
+  "Carolina_Marin_Pornpawee_Chochuwong_HSBC_BWF_WORLD_TOUR_FINALS_2020_SemiFinals": {
+    "file": "Carolina_Marin_Pornpawee_Chochuwong_HSBC_BWF_WORLD_TOUR_FINALS_2020_SemiFinals.mp4",
+    "aligned": true
+  },
+  "Viktor_Axelsen_Hans-Kristian_Solberg_VIittinghus_TOYOTA_THAILAND_OPEN_2021_Finals": {
+    "file": "Viktor_Axelsen_Hans-Kristian_Solberg_VIittinghus_TOYOTA_THAILAND_OPEN_2021_Finals.mp4",
+    "aligned": true
+  },
+  "Viktor_Axelsen_Jonatan_Christie_YONEX_Thailand_Open_2021_QuarterFinals": {
+    "file": "Viktor_Axelsen_Jonatan_Christie_YONEX_Thailand_Open_2021_QuarterFinals.mp4",
+    "aligned": true
+  },
+  "Viktor_Axelsen_Liew_Daren_TOYOTA_THAILAND_OPEN_2021_QuarterFinals": {
+    "file": "Viktor_Axelsen_Liew_Daren_TOYOTA_THAILAND_OPEN_2021_QuarterFinals.mp4",
+    "aligned": true
+  },
+  "CHOU_Tien_Chen_NG_Ka_Long_Angus_Sudirman_Cup_2019_Group_Stage": {
+    "file": "CHOU_Tien_Chen_NG_Ka_Long_Angus_Sudirman_Cup_2019_Group_Stage.mp4",
+    "aligned": false,
+    "note": "Different edit of the broadcast: stroke frames land on venue, crowd and close-up shots (second Sudirman Cup upload with this problem)."
+  },
+  "Viktor_AXELSEN _SHI_Yu_Qi_All_England_Open_2020_QuarterFinals": {
+    "file": "Viktor_AXELSEN _SHI_Yu_Qi_All_England_Open_2020_QuarterFinals.mp4",
+    "aligned": false,
+    "note": "Half the sampled stroke frames are low-angle close camera shots rather than the main broadcast view."
   }
 }

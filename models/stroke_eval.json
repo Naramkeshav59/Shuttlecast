@@ -1,0 +1,35 @@
+{
+  "features": "pooled",
+  "split": {
+    "train": [
+      "An_Se_Young_Pornpawee_Chochuwong_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
+      "Carolina_Marin_Neslihan_Yigit_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
+      "Carolina_Marin_Pornpawee_Chochuwong_HSBC_BWF_WORLD_TOUR_FINALS_2020_SemiFinals",
+      "Ratchanok_Intanon_Pusarla_V._Sindhu_TOYOTA_THAILAND_OPEN_2021_QuarterFinals",
+      "Viktor_Axelsen_Hans-Kristian_Solberg_VIittinghus_TOYOTA_THAILAND_OPEN_2021_Finals",
+      "Viktor_Axelsen_Jonatan_Christie_YONEX_Thailand_Open_2021_QuarterFinals"
+    ],
+    "val": [
+      "Viktor_Axelsen_Liew_Daren_TOYOTA_THAILAND_OPEN_2021_QuarterFinals"
+    ],
+    "test": [
+      "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals"
+    ]
+  },
+  "n_train_strokes": 3815,
+  "hit_detection_test": {
+    "precision": 0.8308457711442786,
+    "recall": 0.8820422535211268,
+    "f1": 0.8556789069171649,
+    "threshold": 0.35,
+    "tolerance_sec": 0.15,
+    "audio_onset_baseline_f1": 0.37
+  },
+  "shot_classification_test": {
+    "family_accuracy": 0.4481481611728668,
+    "family_balanced_accuracy": 0.4272494028603971,
+    "type_accuracy": 0.41296297311782837,
+    "n": 540,
+    "majority_baseline_family_accuracy": 0.25555557012557983
+  }
+}

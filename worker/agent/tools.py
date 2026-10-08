@@ -92,9 +92,16 @@ def build_generation_prompt(observation: dict, context: dict, depth: str, sugges
     """Without the explicit winner/loser line, the model critiqued player B
     even in rallies B won (tactical accuracy 62.5% on 20 rallies)."""
     winner = observation.get("rally_winner")
-    loser = {"A": "B", "B": "A"}.get(winner, "who lost")
+    if winner in ("A", "B"):
+        loser = "B" if winner == "A" else "A"
+        outcome = (f"Outcome: player {winner} won this rally, so the decisive error belongs to "
+                   f"player {loser}. Analyze player {loser}'s play, and name player {loser} in the PATTERN.")
+    else:
+        # uploaded clips: strokes come from the vision models and the winner isn't known
+        outcome = ("Outcome: the winner of this rally isn't known. Identify the decisive stroke from "
+                   "the sequence, and name the player who played it in the PATTERN.")
     return SUGGESTION_PROMPTS[suggestion_type].format(
-        observation=observation, context=context, depth=depth, winner=winner, loser=loser,
+        observation=observation, context=context, depth=depth, outcome=outcome,
     )
 
 

@@ -118,10 +118,13 @@ def render_rally(report: RallyReport, trace: list | None = None) -> None:
     key = (a.set_num, a.rally_id)
     with st.chat_message("assistant", avatar="🏸"):
         head, btn = st.columns([9, 1])
+        if report.rally_winner:
+            meta = (f"Won by player {report.rally_winner} · {report.n_strokes} strokes · "
+                    f"score {report.score_a}–{report.score_b}")
+        else:  # uploaded video: strokes come from the vision models, winner unknown
+            meta = f"{report.n_strokes} strokes detected from video · A = server"
         head.markdown(
-            f"**Set {a.set_num} · Rally {a.rally_id}** &nbsp;{pills(a)}<br>"
-            f"<span class='sc-meta'>Won by player {report.rally_winner} · {report.n_strokes} strokes · "
-            f"score {report.score_a}–{report.score_b}</span>",
+            f"**Set {a.set_num} · Rally {a.rally_id}** &nbsp;{pills(a)}<br><span class='sc-meta'>{meta}</span>",
             unsafe_allow_html=True,
         )
         if btn.button("▶", key=f"watch-{key}", help="Watch this rally", use_container_width=True):
@@ -140,7 +143,7 @@ def render_sidebar_stats(result: JobResult) -> list[str]:
     last = result.rallies[-1]
     st.sidebar.markdown("#### Match so far")
     c1, c2 = st.sidebar.columns(2)
-    c1.metric("Score (A–B)", f"{last.score_a}–{last.score_b}")
+    c1.metric("Score (A–B)", f"{last.score_a}–{last.score_b}" if last.rally_winner else "—")
     c2.metric("Rallies", len(result.rallies))
     c1, c2, c3 = st.sidebar.columns(3)
     c1.metric("Deep", depths.count("deep"))
@@ -168,10 +171,16 @@ def render_video_panel(result: JobResult, source: str) -> None:
 
 def run_live_analysis(match_id: str, set_num: int, rally_id: int, video: Path, result: JobResult) -> JobResult:
     """Local mode only: run the agent on one rally and merge it into the result."""
-    from worker.agent.react_loop import analyze_match
+    from worker.agent.react_loop import analyze_match, analyze_rallies
 
     traces: dict = {}
-    fresh = analyze_match(match_id, video, only={(set_num, rally_id)}, traces=traces)
+    detected = st.session_state.get("detected")  # set when the source is the user's own video
+    if detected is not None:
+        fresh = analyze_rallies(match_id, detected, video, result.fps, only={(set_num, rally_id)}, traces=traces)
+        if not fresh.rallies and not fresh.errors:
+            raise RuntimeError(f"no detected rally {rally_id} in this video")
+    else:
+        fresh = analyze_match(match_id, video, only={(set_num, rally_id)}, traces=traces)
     if fresh.errors:
         raise RuntimeError(fresh.errors[0].error)
     st.session_state.setdefault("traces", {}).update(traces)
@@ -210,13 +219,14 @@ def handle_prompt(prompt: str, result: JobResult, match_id: str, video: Path | N
     return result
 
 
-def conversation(result: JobResult, match_id: str, video: Path | None, source: str) -> None:
+def conversation(result: JobResult, match_id: str, video: Path | None, source: str,
+                 title: str | None = None) -> None:
     st.session_state.setdefault("chat", [])
     shown = render_sidebar_stats(result)
 
     feed, side = st.columns([3, 2], gap="large")
     with feed:
-        st.markdown(f"### {short_name(match_id)}")
+        st.markdown(f"### {title or short_name(match_id)}")
         st.caption("Each message is the agent's take on one rally. Ask a question below, "
                    "or type **analyze rally 21** to watch the agent work live.")
         traces = st.session_state.get("traces", {})
@@ -258,8 +268,83 @@ def pick_match(options: list[str]) -> str:
     return match_id
 
 
+UPLOADS = REPO_ROOT / "data" / "uploads"
+
+
+def own_video_mode() -> None:
+    """Analyze footage ShuttleSet never annotated: a YouTube link or an
+    uploaded file. Strokes are recovered by the trained vision models
+    (vision/infer.py), then the same agent analyzes each detected rally."""
+    st.sidebar.caption("Your video · strokes detected by trained vision models, then analyzed by the agent")
+    if st.session_state.get("result") is not None and st.session_state.get("detected") is not None:
+        if st.sidebar.button("Analyze another video", use_container_width=True):
+            for k in ("result", "chat", "traces", "now_playing", "detected", "video_path", "video_title"):
+                st.session_state.pop(k, None)
+            st.rerun()
+        video = Path(st.session_state.video_path)
+        conversation(st.session_state.result, st.session_state.result.match_id, video, str(video),
+                     title=st.session_state.video_title)
+        return
+
+    st.markdown("### Analyze your own match")
+    st.caption("Any broadcast-style singles footage. The vision models find each stroke and classify the shot; "
+               "the agent then coaches each rally it found.")
+    link_tab, file_tab = st.tabs(["YouTube link", "Upload a video"])
+    url = link_tab.text_input("YouTube URL", placeholder="https://www.youtube.com/watch?v=…")
+    upload = file_tab.file_uploader("Video file", type=["mp4", "mov", "mkv", "webm"])
+    c1, c2 = st.columns(2)
+    minutes = c1.slider("Minutes of video to scan", 1, 30, 5, help="Long matches take a while; start small.")
+    n_rallies = c2.slider("Rallies for the agent to analyze", 1, 15, 3,
+                          help="Each rally is several LLM calls against a rate-limited API.")
+    if not st.button("Analyze", type="primary", disabled=not (url or upload)):
+        return
+
+    from worker.agent.react_loop import analyze_rallies
+    from worker.pipeline.ingest import download_video
+    from vision.infer import StrokeRecognizer
+
+    UPLOADS.mkdir(parents=True, exist_ok=True)
+    with st.status("Working on your video…", expanded=True) as status:
+        if upload is not None:
+            video = UPLOADS / upload.name
+            video.write_bytes(upload.getbuffer())
+            title = upload.name
+        else:
+            st.write("Downloading from YouTube…")
+            vid = url.rstrip("/").split("v=")[-1].split("&")[0].split("/")[-1]
+            video = UPLOADS / f"yt-{vid}.mp4"
+            if not video.exists():
+                download_video(url, video)
+            title = f"YouTube {vid}"
+        st.write("Finding the court and detecting strokes…")
+        bar = st.progress(0.0)
+        detected, fps = StrokeRecognizer().run(video, max_minutes=minutes,
+                                               progress=lambda msg, frac: bar.progress(min(1.0, frac), text=msg))
+        bar.progress(1.0, text=f"found {len(detected)} rallies, {sum(len(d.rally.strokes) for d in detected)} strokes")
+        if not detected:
+            status.update(label="No rallies found", state="error")
+            st.error("No main-court play detected. This works on broadcast-style singles footage "
+                     "(fixed camera behind the court, green mat).")
+            return
+        rallies = [d.rally for d in detected][:n_rallies]
+        st.write(f"Agent analyzing {len(rallies)} of {len(detected)} rallies…")
+        result = analyze_rallies(rallies[0].match_id, rallies, video, fps)
+        status.update(label=f"Done: {len(result.rallies)} rallies analyzed", state="complete")
+    st.session_state.update(result=result, detected=[d.rally for d in detected], video_path=str(video),
+                            video_title=title, chat=[], traces={})
+    st.rerun()
+
+
 def local_mode() -> None:
     sidebar_header()
+    source = st.sidebar.radio("Source", ["Pro match (ShuttleSet)", "Your video"], horizontal=True)
+    if st.session_state.get("source") != source:
+        for k in ("result", "chat", "traces", "now_playing", "detected", "match_id"):
+            st.session_state.pop(k, None)
+        st.session_state.source = source
+    if source == "Your video":
+        own_video_mode()
+        return
     matches = verified_matches()
     match_id = pick_match(list(matches))
     video = REPO_ROOT / "data" / "videos" / matches[match_id]["file"]
