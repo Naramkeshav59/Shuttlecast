@@ -361,27 +361,75 @@ def local_mode() -> None:
 
 def aws_mode() -> None:
     sidebar_header()
-    matches = {m: v for m, v in verified_matches().items() if v["url"]}
-    match_id = pick_match(list(matches))
+    source = st.sidebar.radio("Source", ["Pro match (ShuttleSet)", "Your video"], horizontal=True)
+    if st.session_state.get("source") != source:
+        for k in ("result", "chat", "traces", "now_playing", "job_id", "video_source", "match_id"):
+            st.session_state.pop(k, None)
+        st.query_params.clear()
+        st.session_state.source = source
     st.sidebar.caption("Connected to the AWS backend")
-    if st.sidebar.button("Analyze this match", type="primary", use_container_width=True):
-        resp = requests.post(f"{API_URL}/jobs", json={"match_id": match_id, "youtube_url": matches[match_id]["url"]},
-                             timeout=15)
-        if resp.status_code != 202:
-            st.sidebar.error(f"Submit failed ({resp.status_code}): {resp.text}")
-        else:
-            st.session_state.job_id = resp.json()["job_id"]
-            st.query_params["job"] = st.session_state.job_id
+
+    if source == "Your video":
+        if "job_id" not in st.session_state and "job" not in st.query_params:
+            submit_video_job()
+            return
+        match_id, playback = None, None
+    else:
+        matches = {m: v for m, v in verified_matches().items() if v["url"]}
+        match_id = pick_match(list(matches))
+        playback = matches[match_id]["url"]
+        if st.sidebar.button("Analyze this match", type="primary", use_container_width=True):
+            submit({"match_id": match_id, "youtube_url": playback})
 
     job_id = st.session_state.get("job_id") or st.query_params.get("job")
     if "result" in st.session_state:
-        conversation(st.session_state.result, match_id, None, matches[match_id]["url"])
+        result = st.session_state.result
+        conversation(result, result.match_id, None, st.session_state.get("video_source") or playback,
+                     title=None if match_id else "Your video")
     elif job_id:
         st.session_state.job_id = job_id
         poll_job(job_id)
-    else:
+    elif source != "Your video":
         st.info("Pick a match and press **Analyze this match**. The worker analyzes every rally "
                 "asynchronously; results appear here as a conversation.")
+
+
+def submit(body: dict) -> None:
+    resp = requests.post(f"{API_URL}/jobs", json=body, timeout=15)
+    if resp.status_code != 202:
+        st.error(f"Submit failed ({resp.status_code}): {resp.json().get('error', resp.text)}")
+        return
+    st.session_state.job_id = resp.json()["job_id"]
+    st.query_params["job"] = st.session_state.job_id
+    st.rerun()
+
+
+def submit_video_job() -> None:
+    """Any footage: a YouTube link, or a file uploaded straight to S3 through
+    a presigned URL (large videos never pass through Lambda/API Gateway)."""
+    st.markdown("### Analyze your own match")
+    st.caption("Any broadcast-style singles footage. The cloud worker finds each stroke with the trained "
+               "vision models, then the agent coaches the rallies it found (first 10 minutes of video).")
+    upload_tab, link_tab = st.tabs(["Upload a video", "YouTube link"])
+    upload = upload_tab.file_uploader("Video file", type=["mp4", "mov", "mkv", "webm"])
+    url = link_tab.text_input("YouTube URL", placeholder="https://www.youtube.com/watch?v=…")
+    link_tab.caption("YouTube often blocks downloads from cloud servers; if this fails, upload the file instead.")
+    if not st.button("Analyze", type="primary", disabled=not (upload or url)):
+        return
+    if upload is not None:
+        with st.spinner("Uploading to S3…"):
+            r = requests.post(f"{API_URL}/uploads", json={"filename": upload.name}, timeout=15)
+            if r.status_code != 200:
+                st.error(f"Upload failed ({r.status_code}): {r.text}")
+                return
+            target = r.json()
+            put = requests.put(target["upload_url"], data=upload.getvalue(), timeout=600)
+            if put.status_code != 200:
+                st.error(f"Upload to S3 failed ({put.status_code})")
+                return
+        submit({"video_key": target["video_key"]})
+    else:
+        submit({"youtube_url": url})
 
 
 @st.fragment(run_every=5)
@@ -393,6 +441,8 @@ def poll_job(job_id: str) -> None:
     job = resp.json()
     if job["status"] == "complete":
         st.session_state.result = JobResult(**requests.get(job["result_url"], timeout=30).json())
+        # uploads play from a presigned S3 link; YouTube jobs from the link itself
+        st.session_state.video_source = job.get("video_url") or job.get("youtube_url")
         st.rerun(scope="app")
     elif job["status"] == "failed":
         st.error(f"Job failed: {job.get('error')}")

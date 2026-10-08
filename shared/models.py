@@ -33,8 +33,12 @@ class FrameGroup(BaseModel):
 class Job(BaseModel):
     job_id: str
     status: Literal["queued", "processing", "complete", "failed"] = "queued"
-    match_id: str
-    youtube_url: str
+    # "shuttleset": an annotated match (match_id). "video": any footage -- a
+    # YouTube link or an uploaded file (video_key) -- analyzed via vision/.
+    source: Literal["shuttleset", "video"] = "shuttleset"
+    match_id: str | None = None
+    youtube_url: str | None = None
+    video_key: str | None = None    # S3 key of an uploaded video (uploads/...)
     result_key: str | None = None   # S3 key, only set once complete
     error: str | None = None        # set when status == "failed"
     created_at: str | None = None   # ISO-8601 UTC

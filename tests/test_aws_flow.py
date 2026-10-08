@@ -93,7 +93,8 @@ def test_intake_creates_job_and_enqueues(aws):
     ({"match_id": MATCH_ID, "youtube_url": "https://evil.example.com/x"}, "YouTube"),
     ({"match_id": MATCH_ID, "youtube_url": "http://www.youtube.com/watch?v=x"}, "https"),
     ({"match_id": "", "youtube_url": URL}, "match_id"),
-    ({"youtube_url": URL}, "match_id"),
+    ({}, "provide match_id"),
+    ({"video_key": "../etc/passwd.mp4"}, "uploads/"),
     ([1, 2], "JSON object"),
 ])
 def test_intake_rejects_bad_input(aws, body, expected):
@@ -202,3 +203,62 @@ def test_update_status_refuses_phantom_job(aws):
 
     with pytest.raises(ClientError):
         state.update_status("00000000-0000-0000-0000-000000000000", "processing")
+
+
+# ---- any-video jobs (YouTube link or upload) ------------------------------
+
+def test_youtube_only_creates_video_job(aws):
+    intake = _load_handler("intake")
+    resp = _post(intake, {"youtube_url": URL})
+    assert resp["http"] == 202
+    item = boto3.resource("dynamodb").Table("jobs").get_item(Key={"job_id": resp["job_id"]})["Item"]
+    assert item["source"] == "video" and "match_id" not in item
+
+
+def test_upload_flow_presign_then_submit(aws):
+    intake = _load_handler("intake")
+    status_mod = _load_handler("status")
+    up = intake.handler({"routeKey": "POST /uploads", "body": json.dumps({"filename": "rally.mp4"})}, None)
+    body = json.loads(up["body"])
+    assert up["statusCode"] == 200 and body["video_key"].startswith("uploads/")
+    assert "X-Amz-Signature" in body["upload_url"] or "Signature" in body["upload_url"]
+
+    # submitting before the file exists is rejected
+    early = _post(intake, {"video_key": body["video_key"]})
+    assert early["http"] == 400 and "no uploaded video" in early["error"]
+
+    boto3.client("s3").put_object(Bucket="shuttlecast-test", Key=body["video_key"], Body=b"fake")
+    job = _post(intake, {"video_key": body["video_key"]})
+    assert job["http"] == 202
+    st = _get(status_mod, job["job_id"])
+    assert st["source"] == "video" and st["video_url"].startswith("https://")
+
+
+def test_upload_rejects_non_video(aws):
+    intake = _load_handler("intake")
+    up = intake.handler({"routeKey": "POST /uploads", "body": json.dumps({"filename": "notes.exe"})}, None)
+    assert up["statusCode"] == 400
+
+
+def test_worker_video_job_without_rallies_fails_once(aws, monkeypatch):
+    """No rallies in the footage is permanent: fail now, don't retry 3 times."""
+    from worker import main as worker_main
+    from worker.infra import queue, state
+
+    intake = _load_handler("intake")
+    s3 = boto3.client("s3")
+    up = json.loads(intake.handler({"routeKey": "POST /uploads", "body": json.dumps({"filename": "x.mp4"})}, None)["body"])
+    s3.put_object(Bucket="shuttlecast-test", Key=up["video_key"], Body=b"fake")
+    job_id = _post(intake, {"video_key": up["video_key"]})["job_id"]
+
+    class NoRallies:
+        def run(self, *a, **k):
+            return [], 30.0
+
+    monkeypatch.setattr(worker_main, "recognizer", lambda: NoRallies())
+    msg = queue.receive_job(wait_seconds=0)
+    assert msg.receive_count == 1
+    worker_main.handle(msg)
+    job = state.get_job(job_id)
+    assert job.status == "failed" and "No rallies found" in job.error
+    assert queue.receive_job(wait_seconds=0) is None, "permanent failure must not be retried"

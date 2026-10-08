@@ -12,7 +12,7 @@ _dynamodb = boto3.resource("dynamodb")
 _s3 = boto3.client("s3")
 
 RESULT_URL_TTL_SEC = 3600
-PUBLIC_FIELDS = ("job_id", "status", "match_id", "youtube_url", "error", "created_at", "updated_at")
+PUBLIC_FIELDS = ("job_id", "status", "source", "match_id", "youtube_url", "error", "created_at", "updated_at")
 
 
 def _response(status: int, body: dict) -> dict:
@@ -37,6 +37,13 @@ def handler(event, context):
         return _response(404, {"error": "job not found"})
 
     body = {k: item[k] for k in PUBLIC_FIELDS if k in item}
+    if item.get("video_key"):
+        # an uploaded video: the UI plays it back next to the analysis
+        body["video_url"] = _s3.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": os.environ["S3_BUCKET_NAME"], "Key": item["video_key"]},
+            ExpiresIn=RESULT_URL_TTL_SEC,
+        )
     if item.get("status") == "complete" and item.get("result_key"):
         # The bucket stays private; the client gets a short-lived read link.
         body["result_url"] = _s3.generate_presigned_url(

@@ -10,3 +10,5 @@ training
 tests
 *.safetensors
 *.bin
+data/vision
+data/uploads

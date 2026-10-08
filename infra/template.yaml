@@ -50,6 +50,13 @@ Resources:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          # user uploads are working files: don't pay for (or hold) them forever
+          - Id: expire-uploads
+            Status: Enabled
+            Prefix: uploads/
+            ExpirationInDays: 7
 
   JobsTable:
     Type: AWS::DynamoDB::Table
@@ -104,6 +111,10 @@ Resources:
               - Effect: Allow
                 Action: sqs:SendMessage
                 Resource: !GetAtt JobQueue.Arn
+              # presigned PUT for uploads, and HeadObject to confirm one arrived
+              - Effect: Allow
+                Action: [s3:PutObject, s3:GetObject]
+                Resource: !Sub "${ResultsBucket.Arn}/uploads/*"
 
   StatusRole:
     Type: AWS::IAM::Role
@@ -127,7 +138,9 @@ Resources:
               # a presigned URL carries the signer's permissions
               - Effect: Allow
                 Action: s3:GetObject
-                Resource: !Sub "${ResultsBucket.Arn}/results/*"
+                Resource:
+                  - !Sub "${ResultsBucket.Arn}/results/*"
+                  - !Sub "${ResultsBucket.Arn}/uploads/*"
 
   IntakeFunction:
     Type: AWS::Lambda::Function
@@ -141,6 +154,7 @@ Resources:
         Variables:
           DYNAMODB_TABLE_NAME: !Ref JobsTable
           SQS_QUEUE_URL: !Ref JobQueue
+          S3_BUCKET_NAME: !Ref ResultsBucket
       # placeholder; scripts/deploy_api.sh uploads the real code
       Code:
         ZipFile: "def handler(event, context): return {'statusCode': 503, 'body': 'not deployed'}"
@@ -200,6 +214,13 @@ Resources:
     Properties:
       ApiId: !Ref HttpApi
       RouteKey: POST /jobs
+      Target: !Sub integrations/${IntakeIntegration}
+
+  UploadRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: POST /uploads
       Target: !Sub integrations/${IntakeIntegration}
 
   StatusRoute:
@@ -337,8 +358,9 @@ Resources:
       Family: shuttlecast-worker
       RequiresCompatibilities: [FARGATE]
       NetworkMode: awsvpc
-      Cpu: "1024"
-      Memory: "2048"
+      # 2 vCPU / 4 GB: video jobs run stroke detection (DINOv2) on CPU
+      Cpu: "2048"
+      Memory: "4096"
       RuntimePlatform:
         OperatingSystemFamily: LINUX
         CpuArchitecture: X86_64
@@ -357,6 +379,7 @@ Resources:
             - { Name: SQS_QUEUE_URL, Value: !Ref JobQueue }
             - { Name: AWS_DEFAULT_REGION, Value: !Ref AWS::Region }
             - { Name: MAX_RALLIES, Value: !Ref MaxRallies }
+            - { Name: MAX_VIDEO_MINUTES, Value: "10" }
           Secrets:
             - Name: GROQ_API_KEY
               ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GroqApiKeyParam}

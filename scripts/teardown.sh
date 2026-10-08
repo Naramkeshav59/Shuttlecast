@@ -9,12 +9,11 @@ read -r -p "Delete stack '$STACK' and ALL its data (results, videos, images)? [y
 # CloudFormation can't delete a non-empty bucket or ECR repo
 BUCKET="$(stack_output BucketName)"
 aws s3 rm "s3://$BUCKET" --recursive
+# --force deletes the repo with its images. Deleting images one by one misses
+# the attestation manifests Docker buildx pushes alongside each image, and
+# the stack delete then fails on a "non-empty" repository.
 for key in WorkerRepositoryName UiRepositoryName; do
-  repo="$(stack_output "$key")"
-  ids="$(aws ecr list-images --repository-name "$repo" --query 'imageIds' --output json)"
-  if [ "$ids" != "[]" ]; then
-    aws ecr batch-delete-image --repository-name "$repo" --image-ids "$ids" >/dev/null
-  fi
+  aws ecr delete-repository --repository-name "$(stack_output "$key")" --force >/dev/null
 done
 
 aws cloudformation delete-stack --stack-name "$STACK"
