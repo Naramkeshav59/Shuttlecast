@@ -7,10 +7,11 @@ with broadcast frames pulled at the exact moment of every stroke, decides
 whether the rally is worth analyzing, and writes a coaching note: what went
 wrong, and what the player should have done instead.
 
-Sports platforms can't put human analysts on every match — amateur leagues,
-regional tournaments and emerging markets go uncovered. ShuttleCast runs as
-an async, queue-backed AWS service, so analysis scales with workers instead
-of analysts.
+| | |
+| --- | --- |
+| **Problem** | Most badminton matches (amateur leagues, regional tournaments) never get a human analyst, and most footage has no stroke annotations. |
+| **What I built** | Stroke-recognition models trained on ShuttleSet that turn any match video into labelled rallies; a ReAct agent that decides per rally what is worth analyzing and writes the coaching note; deployed as an async queue-backed AWS service. |
+| **Impact** | Hit detection on raw broadcast footage: F1 **0.87**, vs 0.37 for the audio baseline. Coaching notes that blame the right player: **62% → 94%**. QLoRA on a 2B model took format compliance from **0% to 100%** for under $0.20 of GPU time. |
 
 ```text
 Set 1 / Rally 2 — won by B                                   depth: surface
@@ -39,7 +40,7 @@ SUGGESTION: A should have attacked with a sharp drop or a drive to the front
 - **Production AWS architecture**, as one CloudFormation stack: API Gateway,
   Lambda, SQS with a dead-letter queue, ECS Fargate, ALB, S3, DynamoDB,
   CloudWatch, ECR.
-- **Fine-tuning**: QLoRA distillation of a teacher model into Qwen2-VL-2B,
+- **Fine-tuning**: QLoRA distillation of a 70B teacher into Qwen2-VL-2B on a RunPod GPU,
   with the whole train/eval path smoke-tested on CPU before it touches a GPU.
 - **Measured, not estimated**: every number below comes from a script in
   this repo, and each one states its baseline.
@@ -185,11 +186,28 @@ What moved the numbers:
 End to end on raw video, shot-family accuracy is ~43–46%, because small
 timing errors shift what the classifier sees.
 
-**Fine-tuning** (Qwen2-VL-2B + QLoRA vs untuned baseline, held-out match):
-*not yet run.* The pipeline is smoke-tested end to end on CPU; the full run
-goes on a RunPod GPU (below). `training/evaluate.py` reports format
-compliance, tactical accuracy, agreement with the teacher, and suggestion
-similarity for the baseline and the fine-tuned model on identical inputs.
+**Fine-tuning** (Qwen2-VL-2B + QLoRA vs the untuned model, 34 rallies from
+held-out matches; `training/results/`). The model learns from the 70B
+teacher's analyses. Training used 139 examples, 3 epochs and 54 steps, and
+took 10.4 min on a RunPod RTX A5000 ($0.27/hr, under $0.20 in total).
+Held-out eval loss fell from 1.153 to 1.067.
+
+| | Untuned | Fine-tuned |
+| --- | --- | --- |
+| Follows the output format (`DEPTH / TYPE / PATTERN / SUGGESTION`) | 0% | **100%** |
+| Suggestion similarity to teacher (sentence embeddings) | — | **0.72** mean (47% ≥ 0.75) |
+| Blames the rally's loser | — (unparseable) | 100% |
+
+The untuned model echoes the prompt template back
+(`DEPTH: deep|surface|skip`) instead of filling it in, so a 2B model is
+unusable here without fine-tuning. Caveats:
+
+- The prompt states the rally winner, so attribution is easy.
+- The teacher labelled almost every rally `deep / shot_selection` (all 34
+  eval rallies, 128 of 141 training ones), so the 100% depth/type agreement
+  with the teacher measures nothing. More varied teacher labels come before
+  the next run.
+- 0.72 similarity is below the 0.75 target.
 
 **Tests**: 22 tests (`pytest tests/`). They cover the full intake → queue →
 worker → S3 → status flow against moto's in-memory AWS (validation, retries,
@@ -260,6 +278,11 @@ runpodctl send shuttlecast_training.tgz
 # on the pod:
 bash training/runpod.sh                # train, then eval baseline vs fine-tuned
 ```
+
+Newer RunPod images (Ubuntu 24.04) block system-wide `pip install`
+(PEP 668). So `runpod.sh` installs into a venv created with
+`--system-site-packages`, which keeps the image's CUDA torch and skips a
+2 GB reinstall.
 
 The split is by **match, not rally**: rallies of one match share players and
 patterns, so a rally-level split would leak and inflate the scores.

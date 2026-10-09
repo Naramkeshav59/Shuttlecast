@@ -1,0 +1,225 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Fetching 2 files:   0%|          | 0/2 [00:00<?, ?it/s]Fetching 2 files:  50%|█████     | 1/2 [00:03<00:03,  3.56s/it]Fetching 2 files: 100%|██████████| 2/2 [00:07<00:00,  3.86s/it]Fetching 2 files: 100%|██████████| 2/2 [00:07<00:00,  3.82s/it]
+Loading weights:   0%|          | 0/729 [00:00<?, ?it/s]Loading weights:   0%|          | 3/729 [00:00<00:29, 24.86it/s]Loading weights:   9%|▉         | 64/729 [00:00<00:01, 338.34it/s]Loading weights:  17%|█▋        | 125/729 [00:00<00:01, 455.65it/s]Loading weights:  27%|██▋       | 195/729 [00:00<00:00, 538.71it/s]Loading weights:  35%|███▌      | 256/729 [00:00<00:00, 558.00it/s]Loading weights:  43%|████▎     | 317/729 [00:00<00:00, 571.64it/s]Loading weights:  60%|██████    | 438/729 [00:00<00:00, 773.81it/s]Loading weights:  78%|███████▊  | 570/729 [00:00<00:00, 941.95it/s]Loading weights:  96%|█████████▌| 700/729 [00:00<00:00, 1052.01it/s]Loading weights: 100%|██████████| 729/729 [00:00<00:00, 755.17it/s] 
+trainable params: 18,464,768 || all params: 2,227,450,368 || trainable%: 0.8290
+train=139 eval=34
+  0%|          | 0/54 [00:00<?, ?it/s]/workspace/.venv/lib/python3.12/site-packages/transformers/models/qwen2_vl/image_processing_qwen2_vl.py:129: FutureWarning: Passing `min_pixels` and `max_pixels` to a processor call is deprecated and will be removed in v5.23. Pass in `size={'longest_edge': xxx, 'shortest_edge': xxx} to override the target size.`
+  warnings.warn(
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+  2%|▏         | 1/54 [00:11<10:20, 11.70s/it]  4%|▎         | 2/54 [00:22<09:31, 10.99s/it]  6%|▌         | 3/54 [00:32<09:15, 10.89s/it]  7%|▋         | 4/54 [00:44<09:18, 11.18s/it]  9%|▉         | 5/54 [00:56<09:16, 11.36s/it]                                                9%|▉         | 5/54 [00:56<09:16, 11.36s/it] 11%|█         | 6/54 [01:07<09:00, 11.26s/it] 13%|█▎        | 7/54 [01:18<08:53, 11.36s/it] 15%|█▍        | 8/54 [01:29<08:35, 11.21s/it] 17%|█▋        | 9/54 [01:41<08:31, 11.37s/it] 19%|█▊        | 10/54 [01:52<08:18, 11.32s/it]                                                19%|█▊        | 10/54 [01:52<08:18, 11.32s/it] 20%|██        | 11/54 [02:03<07:53, 11.02s/it] 22%|██▏       | 12/54 [02:13<07:39, 10.95s/it] 24%|██▍       | 13/54 [02:24<07:19, 10.72s/it] 26%|██▌       | 14/54 [02:35<07:13, 10.83s/it] 28%|██▊       | 15/54 [02:47<07:22, 11.35s/it]                                                28%|██▊       | 15/54 [02:47<07:22, 11.35s/it] 30%|██▉       | 16/54 [02:58<07:05, 11.19s/it] 31%|███▏      | 17/54 [03:09<06:57, 11.28s/it] 33%|███▎      | 18/54 [03:13<05:25,  9.03s/it] 35%|███▌      | 19/54 [03:25<05:45,  9.86s/it] 37%|███▋      | 20/54 [03:37<05:54, 10.42s/it]                                                37%|███▋      | 20/54 [03:37<05:54, 10.42s/it] 39%|███▉      | 21/54 [03:48<05:52, 10.68s/it] 41%|████      | 22/54 [03:59<05:47, 10.85s/it] 43%|████▎     | 23/54 [04:10<05:36, 10.86s/it] 44%|████▍     | 24/54 [04:22<05:31, 11.07s/it] 46%|████▋     | 25/54 [04:33<05:23, 11.17s/it]                                                46%|████▋     | 25/54 [04:33<05:23, 11.17s/it]{'loss': '2.221', 'grad_norm': '1.139', 'learning_rate': '0.0001998', 'epoch': '0.2878'}
+{'loss': '1.577', 'grad_norm': '1.803', 'learning_rate': '0.0001932', 'epoch': '0.5755'}
+{'loss': '1.323', 'grad_norm': '1.373', 'learning_rate': '0.0001779', 'epoch': '0.8633'}
+{'loss': '1.193', 'grad_norm': '1.326', 'learning_rate': '0.0001552', 'epoch': '1.115'}
+{'loss': '0.9788', 'grad_norm': '1.387', 'learning_rate': '0.0001274', 'epoch': '1.403'}
+
+  0%|          | 0/34 [00:00<?, ?it/s][A
+  6%|▌         | 2/34 [00:00<00:06,  4.81it/s][A
+  9%|▉         | 3/34 [00:00<00:10,  2.94it/s][A
+ 12%|█▏        | 4/34 [00:01<00:12,  2.40it/s][A
+ 15%|█▍        | 5/34 [00:01<00:12,  2.29it/s][A
+ 18%|█▊        | 6/34 [00:02<00:12,  2.21it/s][A
+ 21%|██        | 7/34 [00:02<00:13,  2.07it/s][A
+ 24%|██▎       | 8/34 [00:03<00:12,  2.05it/s][A
+ 26%|██▋       | 9/34 [00:03<00:12,  2.04it/s][A
+ 29%|██▉       | 10/34 [00:04<00:11,  2.02it/s][A
+ 32%|███▏      | 11/34 [00:05<00:12,  1.88it/s][A
+ 35%|███▌      | 12/34 [00:05<00:12,  1.82it/s][A
+ 38%|███▊      | 13/34 [00:06<00:11,  1.78it/s][A
+ 41%|████      | 14/34 [00:06<00:10,  1.84it/s][A
+ 44%|████▍     | 15/34 [00:07<00:09,  2.01it/s][A
+ 47%|████▋     | 16/34 [00:07<00:08,  2.10it/s][A
+ 50%|█████     | 17/34 [00:08<00:08,  2.09it/s][A
+ 53%|█████▎    | 18/34 [00:08<00:07,  2.05it/s][A
+ 56%|█████▌    | 19/34 [00:08<00:06,  2.18it/s][A
+ 59%|█████▉    | 20/34 [00:09<00:06,  2.33it/s][A
+ 62%|██████▏   | 21/34 [00:09<00:05,  2.21it/s][A
+ 65%|██████▍   | 22/34 [00:10<00:05,  2.09it/s][A
+ 68%|██████▊   | 23/34 [00:10<00:04,  2.21it/s][A
+ 71%|███████   | 24/34 [00:11<00:04,  2.40it/s][A
+ 74%|███████▎  | 25/34 [00:11<00:03,  2.34it/s][A
+ 76%|███████▋  | 26/34 [00:12<00:03,  2.23it/s][A
+ 79%|███████▉  | 27/34 [00:12<00:03,  2.27it/s][A
+ 82%|████████▏ | 28/34 [00:12<00:02,  2.32it/s][A
+ 85%|████████▌ | 29/34 [00:13<00:02,  2.20it/s][A
+ 88%|████████▊ | 30/34 [00:14<00:01,  2.01it/s][A
+ 91%|█████████ | 31/34 [00:14<00:01,  1.92it/s][A
+ 94%|█████████▍| 32/34 [00:15<00:01,  1.92it/s][A
+ 97%|█████████▋| 33/34 [00:15<00:00,  1.97it/s][A
+100%|██████████| 34/34 [00:15<00:00,  2.28it/s][A                                               
+                                               [A 46%|████▋     | 25/54 [04:50<05:23, 11.17s/it]
+100%|██████████| 34/34 [00:15<00:00,  2.28it/s][A
+                                               [A/workspace/.venv/lib/python3.12/site-packages/transformers/models/qwen2_vl/image_processing_qwen2_vl.py:129: FutureWarning: Passing `min_pixels` and `max_pixels` to a processor call is deprecated and will be removed in v5.23. Pass in `size={'longest_edge': xxx, 'shortest_edge': xxx} to override the target size.`
+  warnings.warn(
+ 48%|████▊     | 26/54 [05:01<07:29, 16.05s/it] 50%|█████     | 27/54 [05:11<06:28, 14.38s/it] 52%|█████▏    | 28/54 [05:22<05:49, 13.43s/it] 54%|█████▎    | 29/54 [05:33<05:16, 12.65s/it] 56%|█████▌    | 30/54 [05:44<04:48, 12.03s/it]                                                56%|█████▌    | 30/54 [05:44<04:48, 12.03s/it] 57%|█████▋    | 31/54 [05:54<04:21, 11.37s/it] 59%|█████▉    | 32/54 [06:05<04:09, 11.36s/it] 61%|██████    | 33/54 [06:15<03:48, 10.88s/it] 63%|██████▎   | 34/54 [06:26<03:39, 10.96s/it] 65%|██████▍   | 35/54 [06:37<03:29, 11.04s/it]                                                65%|██████▍   | 35/54 [06:37<03:29, 11.04s/it] 67%|██████▋   | 36/54 [06:41<02:38,  8.78s/it] 69%|██████▊   | 37/54 [06:51<02:39,  9.40s/it] 70%|███████   | 38/54 [07:02<02:34,  9.69s/it] 72%|███████▏  | 39/54 [07:13<02:31, 10.10s/it] 74%|███████▍  | 40/54 [07:24<02:24, 10.34s/it]                                                74%|███████▍  | 40/54 [07:24<02:24, 10.34s/it] 76%|███████▌  | 41/54 [07:35<02:17, 10.58s/it] 78%|███████▊  | 42/54 [07:46<02:09, 10.75s/it] 80%|███████▉  | 43/54 [07:57<01:58, 10.73s/it] 81%|████████▏ | 44/54 [08:07<01:47, 10.71s/it] 83%|████████▎ | 45/54 [08:19<01:37, 10.87s/it]                                                83%|████████▎ | 45/54 [08:19<01:37, 10.87s/it] 85%|████████▌ | 46/54 [08:30<01:27, 10.93s/it] 87%|████████▋ | 47/54 [08:41<01:17, 11.08s/it] 89%|████████▉ | 48/54 [08:53<01:07, 11.23s/it] 91%|█████████ | 49/54 [09:04<00:55, 11.16s/it] 93%|█████████▎| 50/54 [09:15<00:45, 11.29s/it]                                                93%|█████████▎| 50/54 [09:15<00:45, 11.29s/it]{'eval_loss': '1.153', 'eval_runtime': '16.7', 'eval_samples_per_second': '2.036', 'eval_steps_per_second': '2.036', 'epoch': '1.403'}
+{'loss': '1.009', 'grad_norm': '1.626', 'learning_rate': '9.692e-05', 'epoch': '1.691'}
+{'loss': '1.045', 'grad_norm': '1.236', 'learning_rate': '6.676e-05', 'epoch': '1.978'}
+{'loss': '0.85', 'grad_norm': '1.272', 'learning_rate': '3.974e-05', 'epoch': '2.23'}
+{'loss': '0.8623', 'grad_norm': '1.331', 'learning_rate': '1.838e-05', 'epoch': '2.518'}
+{'loss': '0.8217', 'grad_norm': '1.344', 'learning_rate': '4.706e-06', 'epoch': '2.806'}
+
+  0%|          | 0/34 [00:00<?, ?it/s][A
+  6%|▌         | 2/34 [00:00<00:07,  4.24it/s][A
+  9%|▉         | 3/34 [00:00<00:10,  3.05it/s][A
+ 12%|█▏        | 4/34 [00:01<00:12,  2.41it/s][A
+ 15%|█▍        | 5/34 [00:01<00:12,  2.33it/s][A
+ 18%|█▊        | 6/34 [00:02<00:12,  2.22it/s][A
+ 21%|██        | 7/34 [00:03<00:13,  2.05it/s][A
+ 24%|██▎       | 8/34 [00:03<00:13,  1.94it/s][A
+ 26%|██▋       | 9/34 [00:04<00:12,  1.95it/s][A
+ 29%|██▉       | 10/34 [00:04<00:12,  1.96it/s][A
+ 32%|███▏      | 11/34 [00:05<00:11,  1.96it/s][A
+ 35%|███▌      | 12/34 [00:05<00:11,  1.86it/s][A
+ 38%|███▊      | 13/34 [00:06<00:11,  1.81it/s][A
+ 41%|████      | 14/34 [00:06<00:10,  1.88it/s][A
+ 44%|████▍     | 15/34 [00:07<00:09,  2.03it/s][A
+ 47%|████▋     | 16/34 [00:07<00:08,  2.13it/s][A
+ 50%|█████     | 17/34 [00:08<00:08,  2.09it/s][A
+ 53%|█████▎    | 18/34 [00:08<00:07,  2.20it/s][A
+ 56%|█████▌    | 19/34 [00:08<00:06,  2.15it/s][A
+ 59%|█████▉    | 20/34 [00:09<00:06,  2.33it/s][A
+ 62%|██████▏   | 21/34 [00:09<00:05,  2.54it/s][A
+ 65%|██████▍   | 22/34 [00:10<00:05,  2.27it/s][A
+ 68%|██████▊   | 23/34 [00:10<00:04,  2.34it/s][A
+ 71%|███████   | 24/34 [00:10<00:04,  2.37it/s][A
+ 74%|███████▎  | 25/34 [00:11<00:03,  2.25it/s][A
+ 76%|███████▋  | 26/34 [00:11<00:03,  2.29it/s][A
+ 79%|███████▉  | 27/34 [00:12<00:02,  2.38it/s][A
+ 82%|████████▏ | 28/34 [00:12<00:02,  2.45it/s][A
+ 85%|████████▌ | 29/34 [00:13<00:02,  2.28it/s][A
+ 88%|████████▊ | 30/34 [00:13<00:01,  2.19it/s][A
+ 91%|█████████ | 31/34 [00:14<00:01,  2.13it/s][A
+ 94%|█████████▍| 32/34 [00:14<00:00,  2.05it/s][A
+ 97%|█████████▋| 33/34 [00:15<00:00,  2.01it/s][A
+100%|██████████| 34/34 [00:15<00:00,  2.32it/s][A                                               
+                                               [A 93%|█████████▎| 50/54 [09:32<00:45, 11.29s/it]
+100%|██████████| 34/34 [00:15<00:00,  2.32it/s][A
+                                               [A/workspace/.venv/lib/python3.12/site-packages/transformers/models/qwen2_vl/image_processing_qwen2_vl.py:129: FutureWarning: Passing `min_pixels` and `max_pixels` to a processor call is deprecated and will be removed in v5.23. Pass in `size={'longest_edge': xxx, 'shortest_edge': xxx} to override the target size.`
+  warnings.warn(
+ 94%|█████████▍| 51/54 [09:43<00:48, 16.25s/it] 96%|█████████▋| 52/54 [09:54<00:29, 14.66s/it] 98%|█████████▊| 53/54 [10:05<00:13, 13.56s/it]100%|██████████| 54/54 [10:09<00:00, 10.59s/it]{'eval_loss': '1.067', 'eval_runtime': '16.28', 'eval_samples_per_second': '2.088', 'eval_steps_per_second': '2.088', 'epoch': '2.806'}
+
+  0%|          | 0/34 [00:00<?, ?it/s][A
+  6%|▌         | 2/34 [00:00<00:07,  4.40it/s][A
+  9%|▉         | 3/34 [00:00<00:10,  2.99it/s][A
+ 12%|█▏        | 4/34 [00:01<00:12,  2.39it/s][A
+ 15%|█▍        | 5/34 [00:01<00:12,  2.30it/s][A
+ 18%|█▊        | 6/34 [00:02<00:12,  2.22it/s][A
+ 21%|██        | 7/34 [00:03<00:13,  2.06it/s][A
+ 24%|██▎       | 8/34 [00:03<00:12,  2.03it/s][A
+ 26%|██▋       | 9/34 [00:04<00:12,  2.03it/s][A
+ 29%|██▉       | 10/34 [00:04<00:12,  1.90it/s][A
+ 32%|███▏      | 11/34 [00:05<00:12,  1.82it/s][A
+ 35%|███▌      | 12/34 [00:05<00:12,  1.77it/s][A
+ 38%|███▊      | 13/34 [00:06<00:11,  1.76it/s][A
+ 41%|████      | 14/34 [00:06<00:10,  1.84it/s][A
+ 44%|████▍     | 15/34 [00:07<00:09,  1.99it/s][A
+ 47%|████▋     | 16/34 [00:07<00:08,  2.09it/s][A
+ 50%|█████     | 17/34 [00:08<00:08,  2.08it/s][A
+ 53%|█████▎    | 18/34 [00:08<00:07,  2.07it/s][A
+ 56%|█████▌    | 19/34 [00:09<00:06,  2.15it/s][A
+ 59%|█████▉    | 20/34 [00:09<00:05,  2.36it/s][A
+ 62%|██████▏   | 21/34 [00:09<00:05,  2.55it/s][A
+ 65%|██████▍   | 22/34 [00:10<00:05,  2.28it/s][A
+ 68%|██████▊   | 23/34 [00:10<00:04,  2.35it/s][A
+ 71%|███████   | 24/34 [00:11<00:04,  2.34it/s][A
+ 74%|███████▎  | 25/34 [00:11<00:03,  2.26it/s][A
+ 76%|███████▋  | 26/34 [00:12<00:03,  2.21it/s][A
+ 79%|███████▉  | 27/34 [00:12<00:03,  2.25it/s][A
+ 82%|████████▏ | 28/34 [00:12<00:02,  2.48it/s][A
+ 85%|████████▌ | 29/34 [00:13<00:02,  2.34it/s][A
+ 88%|████████▊ | 30/34 [00:13<00:01,  2.35it/s][A
+ 91%|█████████ | 31/34 [00:14<00:01,  2.11it/s][A
+ 94%|█████████▍| 32/34 [00:14<00:00,  2.18it/s][A
+ 97%|█████████▋| 33/34 [00:15<00:00,  2.13it/s][A
+100%|██████████| 34/34 [00:15<00:00,  2.42it/s][A                                               
+                                               [A100%|██████████| 54/54 [10:25<00:00, 10.59s/it]
+100%|██████████| 34/34 [00:15<00:00,  2.42it/s][A
+                                               [A                                               100%|██████████| 54/54 [10:26<00:00, 10.59s/it]100%|██████████| 54/54 [10:26<00:00, 11.59s/it]
+{'eval_loss': '1.067', 'eval_runtime': '16.34', 'eval_samples_per_second': '2.081', 'eval_steps_per_second': '2.081', 'epoch': '3'}
+{'train_runtime': '626', 'train_samples_per_second': '0.666', 'train_steps_per_second': '0.086', 'train_loss': '1.163', 'epoch': '3'}
+adapter saved to /workspace/checkpoints/qwen2vl-shuttlecast-qlora/adapter
+Loading weights:   0%|          | 0/729 [00:00<?, ?it/s]Loading weights:   0%|          | 3/729 [00:00<00:29, 24.77it/s]Loading weights:   9%|▉         | 64/729 [00:00<00:01, 338.31it/s]Loading weights:  17%|█▋        | 125/729 [00:00<00:01, 453.06it/s]Loading weights:  26%|██▌       | 189/729 [00:00<00:01, 522.23it/s]Loading weights:  34%|███▍      | 248/729 [00:00<00:00, 545.38it/s]Loading weights:  43%|████▎     | 316/729 [00:00<00:00, 583.60it/s]Loading weights:  59%|█████▉    | 430/729 [00:00<00:00, 760.73it/s]Loading weights:  77%|███████▋  | 562/729 [00:00<00:00, 929.87it/s]Loading weights:  95%|█████████▌| 694/729 [00:00<00:00, 1043.48it/s]Loading weights: 100%|██████████| 729/729 [00:00<00:00, 754.08it/s] 
+/workspace/.venv/lib/python3.12/site-packages/transformers/models/qwen2_vl/image_processing_qwen2_vl.py:129: FutureWarning: Passing `min_pixels` and `max_pixels` to a processor call is deprecated and will be removed in v5.23. Pass in `size={'longest_edge': xxx, 'shortest_edge': xxx} to override the target size.`
+  warnings.warn(
+{
+  "model": "baseline (untuned)",
+  "n": 34,
+  "format_compliance": 0.0,
+  "tactical_accuracy": {
+    "accuracy": null,
+    "scored": 0,
+    "unattributed": 0
+  },
+  "teacher_tactical_accuracy": {
+    "accuracy": 1.0,
+    "scored": 34,
+    "unattributed": 0
+  },
+  "depth_agreement_with_teacher": null,
+  "type_agreement_with_teacher": null,
+  "suggestion_similarity_to_teacher": {
+    "mean": null,
+    "pct_above_threshold": null,
+    "n": 0
+  }
+}
+Loading weights:   0%|          | 0/729 [00:00<?, ?it/s]Loading weights:   0%|          | 3/729 [00:00<00:29, 24.86it/s]Loading weights:   9%|▉         | 64/729 [00:00<00:01, 339.39it/s]Loading weights:  18%|█▊        | 128/729 [00:00<00:01, 468.87it/s]Loading weights:  27%|██▋       | 195/729 [00:00<00:00, 540.18it/s]Loading weights:  35%|███▌      | 256/729 [00:00<00:00, 557.93it/s]Loading weights:  44%|████▍     | 319/729 [00:00<00:00, 581.78it/s]Loading weights:  59%|█████▉    | 430/729 [00:00<00:00, 746.81it/s]Loading weights:  77%|███████▋  | 562/729 [00:00<00:00, 921.90it/s]Loading weights:  95%|█████████▌| 694/729 [00:00<00:00, 1036.85it/s]Loading weights: 100%|██████████| 729/729 [00:00<00:00, 753.48it/s] 
+/workspace/.venv/lib/python3.12/site-packages/transformers/models/qwen2_vl/image_processing_qwen2_vl.py:129: FutureWarning: Passing `min_pixels` and `max_pixels` to a processor call is deprecated and will be removed in v5.23. Pass in `size={'longest_edge': xxx, 'shortest_edge': xxx} to override the target size.`
+  warnings.warn(
+[1/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally1: deep
+[2/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally2: deep
+[3/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally3: deep
+[4/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally4: deep
+[5/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally5: deep
+[6/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally6: deep
+[7/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally7: deep
+[8/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally8: deep
+[9/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally9: deep
+[10/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally10: deep
+[11/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally11: deep
+[12/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally12: deep
+[13/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally13: deep
+[14/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally14: deep
+[15/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally15: deep
+[16/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally16: deep
+[17/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally17: deep
+[18/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally18: deep
+[19/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally19: deep
+[20/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally20: deep
+[21/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally21: deep
+[22/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally22: deep
+[23/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally23: deep
+[24/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally24: deep
+[25/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally25: deep
+[26/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally26: deep
+[27/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally27: deep
+[28/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally28: deep
+[29/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally29: deep
+[30/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally30: deep
+[31/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally31: deep
+[32/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally32: deep
+[33/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally33: deep
+[34/34] Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally34: deep
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|██████████| 103/103 [00:00<00:00, 1876.77it/s]
+{
+  "model": "checkpoints/qwen2vl-shuttlecast-qlora/adapter",
+  "n": 34,
+  "format_compliance": 1.0,
+  "tactical_accuracy": {
+    "accuracy": 1.0,
+    "scored": 34,
+    "unattributed": 0
+  },
+  "teacher_tactical_accuracy": {
+    "accuracy": 1.0,
+    "scored": 34,
+    "unattributed": 0
+  },
+  "depth_agreement_with_teacher": 1.0,
+  "type_agreement_with_teacher": 1.0,
+  "suggestion_similarity_to_teacher": {
+    "mean": 0.7205649503682182,
+    "pct_above_threshold": 0.47058823529411764,
+    "n": 34
+  }
+}

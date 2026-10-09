@@ -1,0 +1,398 @@
+{
+  "model": "baseline (untuned)",
+  "n": 34,
+  "format_compliance": 0.0,
+  "tactical_accuracy": {
+    "accuracy": null,
+    "scored": 0,
+    "unattributed": 0
+  },
+  "teacher_tactical_accuracy": {
+    "accuracy": 1.0,
+    "scored": 34,
+    "unattributed": 0
+  },
+  "depth_agreement_with_teacher": null,
+  "type_agreement_with_teacher": null,
+  "suggestion_similarity_to_teacher": {
+    "mean": null,
+    "pct_above_threshold": null,
+    "n": 0
+  },
+  "records": [
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally1",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player A made a deep surface shot",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "B's passive drop was the decisive error.",
+        "suggestion_text": "After A's lob, B should have taken the attacking opportunity with a smash or a fast drive instead of a soft drop, keeping the rally offensive and preventing A from dictating the next shot."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally2",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player B's return was too far from the net\nSUGGESTION: player B should have returned the shuttlecock closer to the net to create more opportunities for her opponent.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "A's return net shot was too high and left the shuttle deep on the opponent's side.",
+        "suggestion_text": "A should have played a tighter, lower net shot or a well\u2011timed lift to regain control, instead of allowing B to attack with a drive."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally3",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player A's return was too far from the net\nSUGGESTION: player A should have returned the shuttlecock closer to the net to create more opportunities for player B.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "B's long service was out of the service box.",
+        "suggestion_text": "B should shorten his toss and open the racket face more to keep the shuttle landing just inside the service line, using a more controlled swing to ensure a legal, tighter serve that pressures A."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally4",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player A's error was to drop the ball to player B\nSUGGESTION: player A should have played a drop to player B to exploit the gap between the two players.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "B's clear was too short and landed in a weak spot, giving A an easy attacking opportunity.",
+        "suggestion_text": "B should lift the shuttle higher and deeper toward the far back\u2011court corner, or choose a defensive drive instead of a low clear, to prevent A from capitalising on a short, weak return."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally5",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player B's error was to drop the ball to player A\nSUGGESTION: player B should have lobbed the ball to player A to exploit the gap between the two players.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "A's long service was too deep, giving B the chance to attack.",
+        "suggestion_text": "Aim to place the serve shorter and more to the T or body line, forcing B to stay defensive and reducing the opportunity for an early drop. Follow the serve with a quick forward step to be ready for the opponent's response."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally6",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player A's wrist smash was too low and too far from the net\nSUGGESTION: player A should have hit the shuttlecock closer to the net and at a higher angle to make it more difficult for the opponent to return.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "B's defensive return drive was too passive and left the shuttle in a weak position.",
+        "suggestion_text": "B should have answered the wrist smash with an aggressive, angled lift or a powerful drive to the backhand corner, pushing A back and preventing an easy attacking opportunity."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally7",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player B's error was to hit the shuttlecock to the net, which led to player A's return.\nSUGGESTION: Instead of hitting the shuttlecock to the net, player B should have hit it to the backcourt to create more opportunities for his partner.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "A's clear was too short and left the shuttle in a position for B to smash.",
+        "suggestion_text": "A should have hit a deeper, more angled clear toward the sideline (or a higher lift) to force B further back and deny the easy smash opportunity."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally8",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player B's error was to drop the ball to the ground\nSUGGESTION: player B should have hit the ball up and over the net to create more opportunities for her partner.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "A's push was mistimed and sent the shuttle out of bounds.",
+        "suggestion_text": "A should have chosen a defensive lift or angled clear instead of the low push, keeping the shuttle in play and forcing B to move."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally9",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player B's error was to drop the ball to the net.\nSUGGESTION: player B should have played a net shot to keep the rally alive.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "A's push was the decisive error.",
+        "suggestion_text": "A should have lifted the shuttle high to the backcourt (or used a sharper net shot) instead of the weak push, giving him time to recover and preventing B from attacking."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally10",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player B's return was too deep and the opponent was able to recover quickly\nSUGGESTION: player B should have played a higher and more aggressive shot to keep the opponent off balance.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "A's lob was the decisive error.",
+        "suggestion_text": "Instead of lobbing high after B's drop, A should have kept the shuttle low with a defensive drive or a deep clear, denying B time to set up a wrist smash."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally11",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: B's return was too aggressive and led to a tactical error.\nSUGGESTION: B's return was too aggressive and led to a tactical error. Try to use a more strategic approach and focus on positioning and pattern exploitation.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "A's return net after B's smash was a weak, mistimed shot.",
+        "suggestion_text": "A should have lifted the shuttle high and deep (a defensive clear) to give himself time and push B back, instead of trying a low net return from the backcourt."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally12",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player A's error was to hit the shuttlecock to the net, which led to player A's loss.\nSUGGESTION: Instead of hitting the shuttlecock to the net, player A should have hit it to the backcourt to create more opportunities for her team.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "B's 11th clear was too short, landing in the mid\u2011court.",
+        "suggestion_text": "B should aim for a deeper, more vertical clear (or a powerful drive) to force A back and prevent the opponent from taking the next winning clear."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally13",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player B's error was to hit the shuttlecock to the back of the net\nSUGGESTION: player B should have hit the shuttlecock to the front of the net to create more space for her opponent.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "A's clear was a defensive shot that handed B the opportunity to smash.",
+        "suggestion_text": "After B's lob, A should have moved forward and played an attacking drive or net shot instead of a high clear, keeping the shuttle low to prevent B from executing a smash."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally14",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player A's error was to drop the ball to the ground\nSUGGESTION: player A should have played a net shot to get the ball up in the air.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "B's final net shot was too passive and left the shuttle at a comfortable height for A.",
+        "suggestion_text": "In that situation B should have either lifted the shuttle high to the backcourt or played a tighter, lower angled net kill to deny A the opportunity to attack."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally15",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: A's wrist smash was too deep and the ball landed on the opponent's side.\nSUGGESTION: A should have played a more aggressive shot like a smash or a drop shot to keep the ball in play.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "B's wrist smash was mistimed and landed short, giving A the chance to reply with a defensive lob.",
+        "suggestion_text": "B should take the smash only when the shuttle is high enough for a full\u2011arm swing and aim deep into A's backcourt, or opt for a drive rather than a low, short smash in that situation."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally16",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player A's back-court drive was too deep and the shuttlecock landed on the other side of the court.\nSUGGESTION: player A should have played a more aggressive back-court drive and positioned herself closer to the net to make it easier for her to reach the shuttlecock.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "B's back\u2011court drive was poorly placed, giving A the chance to finish the rally.",
+        "suggestion_text": "B should have played a higher, more angled drive (or a defensive lob) to push the shuttle deeper and buy recovery time, rather than the flat drive that A exploited."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally17",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player B's error was a deep surface shot\nSUGGESTION: player B should have played a net shot to exploit the opponent's positioning.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "A's passive drop was too weak, allowing B to attack and finish the rally.",
+        "suggestion_text": "A should replace the passive drop with a more aggressive shot\u2014such as a sharp drive or a well\u2011placed lift to B's backcourt\u2014to prevent B from taking the next offensive opportunity."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally18",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player A's wrist smash was too low and too far back\nSUGGESTION: player A should have hit the shuttlecock closer to the net and at a higher angle.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "B's wrist smash was poorly placed, giving A an easy attacking opportunity.",
+        "suggestion_text": "B should have chosen a high defensive clear or a well\u2011directed drive to keep A deep, rather than attempting an off\u2011center wrist smash that left a vulnerable angle."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally19",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player B's error was to not hit the shuttlecock to the net\nSUGGESTION: player B should have hit the shuttlecock to the net to create a tactical opportunity.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "A's cross\u2011court net shot was the error.",
+        "suggestion_text": "A should have chosen a lift or a fast drive instead of a low cross\u2011court net shot, keeping the shuttle deep and preventing B from seizing the net and unleashing the winning rush."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally20",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player A's wrist smash was too deep and the shuttlecock landed on the ground\nSUGGESTION: player A's wrist smash was too deep and the shuttlecock landed on the ground, so player A's pattern exploitation was incorrect.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "B's defensive return drive was too short, leaving the shuttle in A's hitting zone.",
+        "suggestion_text": "B should replace the short defensive drive with a deeper, angled shot or a well\u2011placed lift to regain distance and force A to move, preventing an easy winner."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally21",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: A's return net hit was too far and too low.\nSUGGESTION: A's return net hit was too far and too low. A should have hit the shuttlecock higher and closer to the net.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "B's clear landed too shallow, giving A the chance to attack at the net.",
+        "suggestion_text": "B should drive the clear higher and deeper into the back corner, forcing A to retreat before attempting a net kill, and avoid short clears that leave the shuttle within easy attacking range."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally22",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player A's error was to drop the shuttlecock\nSUGGESTION: player A should have lobbed the shuttlecock to player B.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "B's smash was mistimed and landed in a vulnerable area, allowing A to finish the rally.",
+        "suggestion_text": "After being forced back by A's lob, B should prioritize a well\u2011placed defensive clear or a controlled drive from a balanced stance rather than a low\u2011percentage smash from an awkward position."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally23",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player B's error was to hit the shuttlecock to the net, which led to player A's return.\nSUGGESTION: Instead of hitting the shuttlecock to the net, player B should have hit it to the backcourt to create more opportunities for his partner.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "A's final net shot was overly passive and landed too close to the net, giving B a winning opportunity.",
+        "suggestion_text": "A should have used a more aggressive, angled net drive or a quick lift to the rear court instead of a weak net shot, keeping the shuttle out of B's smash range."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally24",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player A's wrist smash was too low and too far from the net\nSUGGESTION: player A should have hit the shuttlecock closer to the net and at a higher angle to make it more difficult for player B to return.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "B's long service gave A the chance to unleash a winning wrist smash.",
+        "suggestion_text": "B should aim for a more precise, shorter serve\u2014targeting the service box near the T and varying depth\u2014to force A into a defensive return rather than a smash."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally25",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player B's return was too far from the net\nSUGGESTION: player B should have returned the ball closer to the net to create more opportunities for her opponent.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "A's final push after B's net return was too weak and left the shuttle in an easily attackable position.",
+        "suggestion_text": "After a net shot, A should have either driven the shuttle low and fast to B's forehand or lifted it deep to the backcourt to regain the offensive stance, rather than a soft push."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally26",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: The player who erred was player B.\nSUGGESTION: The player B should have returned the shot with a deep surface and skip to the net.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "A's final lob was poorly placed and gave B the opportunity to win the point.",
+        "suggestion_text": "A should have avoided the high lob and instead played a low drive or smash toward B's backhand side to maintain pressure and prevent a free point."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally27",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player A's error was to not return the net shot\nSUGGESTION: player A should have returned the net shot to give player B more options.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "B's passive drop gave A a free attacking opportunity.",
+        "suggestion_text": "B should replace the passive drop with a more aggressive lift or drive to the backcourt, forcing A to retreat and preventing the immediate net attack."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally28",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player A's error was to drop the shuttlecock\nSUGGESTION: player A should have played a high shot to keep the shuttlecock in play.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "B's drop shot was poorly executed, landing short and giving A an easy attacking opportunity.",
+        "suggestion_text": "B should avoid low, short drops in that situation; either play a higher clear to push A back or place a tighter, more precise net drop that lands just over the net and stays low, denying A a straightforward smash."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally29",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player A's return was too far from the net\nSUGGESTION: player A should have returned the ball closer to the net to create more opportunities for her partner.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "B's return net was placed out of the court after A's wrist smash.",
+        "suggestion_text": "B should have lifted the shuttle deep to the backcourt or driven it low and flat instead of attempting a weak net return, keeping the rally alive and forcing A to move."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally30",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: A's return was too deep and the opponent was able to reach the net.\nSUGGESTION: A should have played a deeper return to give Kosetskava more room to reach the net.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "B's drop after A's lob was poorly placed, allowing A to finish the rally.",
+        "suggestion_text": "On the return to a lob, B should choose a defensive lift or a low drive to keep the shuttle deep and contested, instead of a short drop that leaves the shuttle easy to attack."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally31",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player B's shot was too deep and landed on the opponent's side\nSUGGESTION: player B should have played a deeper shot and landed on the opponent's side to create more opportunities.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "A's cross\u2011court net shot was too short and left B a free, winning net shot.",
+        "suggestion_text": "A should have either driven the shuttle flat toward B's backhand or lifted it deep to regain court control, rather than attempting a weak cross\u2011court net shot."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally32",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player A's error was to hit the ball to the net\nSUGGESTION: player A's error was to hit the ball to the net, which allowed player B to return the ball with a drop shot.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "B's final clear was too short, leaving the shuttle within A's attacking zone.",
+        "suggestion_text": "B should drive the shuttle to the back corners with more height and depth, or choose a more aggressive shot (e.g., a drive or smash) instead of a short clear when under pressure."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally33",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player A's error was to drop the shuttlecock\nSUGGESTION: player A should have hit the shuttlecock back to player B.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "B's cross-court net shot was mistimed and allowed A to win the rally.",
+        "suggestion_text": "B should have either lifted the shuttle to the backcourt or executed a sharper, more angled net shot with enough depth to keep the shuttle out of A's immediate reach."
+      }
+    },
+    {
+      "id": "Evgeniya_Kosetskaya_Michelle_Li_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals/set1/rally34",
+      "raw": "DEPTH: deep|surface|skip\nTYPE: pattern_exploitation|none\nPATTERN: player B's back-court drive was too deep and the shuttlecock landed on the opponent's side.\nSUGGESTION: player B should have played a more aggressive shot and positioned herself closer to the net to gain an advantage.",
+      "parsed": null,
+      "teacher": {
+        "depth": "deep",
+        "suggestion_type": "shot_selection",
+        "tactical_pattern": "A's back\u2011court drive from a forward position was the error.",
+        "suggestion_text": "From that spot A should have chosen a higher, deeper lift or a defensive clear instead of a low drive, giving himself time to recover and preventing B from attacking the weak return."
+      }
+    }
+  ]
+}
