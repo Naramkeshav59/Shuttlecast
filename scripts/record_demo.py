@@ -57,6 +57,7 @@ def wait_for_text(page: Page, pattern: str, timeout_s: int, caption: str) -> boo
 
 
 def smooth_scroll(page: Page, px: int, steps: int = 20) -> None:
+    page.mouse.move(650, 450)  # over the feed; the wheel scrolls whatever is under the cursor
     for _ in range(steps):
         page.mouse.wheel(0, px / steps)
         page.wait_for_timeout(120)

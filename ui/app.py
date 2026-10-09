@@ -361,7 +361,14 @@ def local_mode() -> None:
 
 def aws_mode() -> None:
     sidebar_header()
-    source = st.sidebar.radio("Source", ["Pro match (ShuttleSet)", "Your video"], horizontal=True)
+    sources = ["Pro match (ShuttleSet)", "Your video"]
+    if "source" not in st.session_state and "job" in st.query_params:
+        # opening a link to an upload job: start on "Your video", not the match picker
+        resp = requests.get(f"{API_URL}/jobs/{st.query_params['job']}", timeout=15)
+        if resp.status_code == 200 and resp.json().get("source") == "video":
+            st.session_state.source = sources[1]
+    source = st.sidebar.radio("Source", sources, horizontal=True,
+                              index=sources.index(st.session_state.get("source", sources[0])))
     # Clear the old job only on a real switch. On a fresh page load there's no
     # previous source, and clearing then wiped ?job= -- refreshing the page
     # lost the job you were waiting on.
