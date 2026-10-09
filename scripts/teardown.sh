@@ -6,6 +6,15 @@ source "$(dirname "$0")/_aws_common.sh"
 read -r -p "Delete stack '$STACK' and ALL its data (results, videos, images)? [y/N] " ok
 [ "$ok" = "y" ] || { echo "aborted"; exit 1; }
 
+# Stop the services first: a worker mid-job writes its result to S3 after the
+# bucket is emptied, and the stack delete then fails on a non-empty bucket.
+CLUSTER="$(stack_output ClusterName)"
+for key in WorkerServiceName UiServiceName; do
+  aws ecs update-service --cluster "$CLUSTER" --service "$(stack_output "$key")" --desired-count 0 >/dev/null
+done
+aws ecs wait services-stable --cluster "$CLUSTER" \
+  --services "$(stack_output WorkerServiceName)" "$(stack_output UiServiceName)"
+
 # CloudFormation can't delete a non-empty bucket or ECR repo
 BUCKET="$(stack_output BucketName)"
 aws s3 rm "s3://$BUCKET" --recursive
