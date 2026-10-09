@@ -358,9 +358,10 @@ Resources:
       Family: shuttlecast-worker
       RequiresCompatibilities: [FARGATE]
       NetworkMode: awsvpc
-      # 2 vCPU / 4 GB: video jobs run stroke detection (DINOv2) on CPU
-      Cpu: "2048"
-      Memory: "4096"
+      # 4 vCPU / 8 GB: video jobs run stroke detection (DINOv2) on CPU, which
+      # was 55% of a 3-min upload's wall time at 2 vCPU and scales with cores
+      Cpu: "4096"
+      Memory: "8192"
       RuntimePlatform:
         OperatingSystemFamily: LINUX
         CpuArchitecture: X86_64

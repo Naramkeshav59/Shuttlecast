@@ -448,8 +448,14 @@ def poll_job(job_id: str) -> None:
         st.error(f"Job failed: {job.get('error')}")
     else:
         note = f" — {job['error']}" if job.get("error") else ""
+        step = job.get("progress") or job["status"]
         with st.chat_message("assistant", avatar="🏸"):
-            st.markdown(f"Working on it — job is **{job['status']}**{note}. This page updates by itself.")
+            st.markdown(f"Working on it — **{step}**{note}. Rallies appear here as they finish.")
+        if job.get("result_url"):
+            # the worker rewrites the result after every rally; show what's done so far
+            partial = JobResult(**requests.get(job["result_url"], timeout=30).json())
+            for report in partial.rallies:
+                render_rally(report, None)
 
 
 if API_URL:

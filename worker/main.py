@@ -7,7 +7,7 @@ import signal
 import tempfile
 from pathlib import Path
 
-from shared.models import Job
+from shared.models import Job, JobResult
 from worker.agent.react_loop import analyze_match, analyze_rallies
 from worker.infra import queue, state, storage
 from worker.observability.logger import bind, clear, log_event, timed
@@ -63,7 +63,7 @@ def fetch_video(job: Job, work_dir: Path) -> Path:
     return dest
 
 
-def analyze_video_job(job: Job, work_dir: Path, heartbeat):
+def analyze_video_job(job: Job, work_dir: Path, heartbeat, on_progress=None):
     """Footage nobody annotated: recover strokes with the trained vision
     models, then run the same agent on each detected rally."""
     dest = work_dir / "video.mp4"
@@ -78,6 +78,7 @@ def analyze_video_job(job: Job, work_dir: Path, heartbeat):
                 raise PermanentJobError(
                     "YouTube refused the download from the cloud worker. Upload the video file instead."
                 ) from exc
+    state.update_status(job.job_id, "processing", progress="Finding rallies in the video")
     with timed("stroke_detection"):
         detected, fps = recognizer().run(dest, match_id=f"video-{job.job_id[:8]}", max_minutes=MAX_VIDEO_MINUTES)
     log_event("strokes_detected", rallies=len(detected), strokes=sum(len(d.rally.strokes) for d in detected))
@@ -89,7 +90,8 @@ def analyze_video_job(job: Job, work_dir: Path, heartbeat):
     rallies = [d.rally for d in detected][:MAX_RALLIES] if MAX_RALLIES else [d.rally for d in detected]
     with timed("match_analysis"):
         return analyze_rallies(rallies[0].match_id, rallies, dest, fps, job_id=job.job_id,
-                               youtube_url=job.youtube_url, on_rally_done=heartbeat)
+                               youtube_url=job.youtube_url, on_rally_done=heartbeat,
+                               on_progress=on_progress)
 
 
 def process(msg: queue.QueueMessage) -> None:
@@ -106,12 +108,22 @@ def process(msg: queue.QueueMessage) -> None:
 
     bind(job_id=job.job_id, match_id=job.match_id, source=job.source)
     log_event("job_started", attempt=msg.receive_count)
-    state.update_status(job.job_id, "processing")
+    state.update_status(job.job_id, "processing", progress="Starting")
     heartbeat = lambda _rally: queue.extend_visibility(msg, VISIBILITY_HEARTBEAT_SEC)  # noqa: E731
+    key = storage.result_key(job.job_id)
+
+    def on_progress(partial: JobResult, total: int) -> None:
+        # Rewrite the result object after every rally so the UI can show
+        # finished rallies while the rest are still running. Status stays
+        # 'processing'; only the final write flips it to 'complete'.
+        storage.put_json(key, partial.model_dump_json())
+        done = len(partial.rallies) + len(partial.errors)
+        state.update_status(job.job_id, "processing", result_key=key,
+                            progress=f"Analyzed {done} of {total} rallies")
 
     with tempfile.TemporaryDirectory() as tmp:
         if job.source == "video":
-            result = analyze_video_job(job, Path(tmp), heartbeat)
+            result = analyze_video_job(job, Path(tmp), heartbeat, on_progress)
         else:
             with timed("video_fetch"):
                 video_path = fetch_video(job, Path(tmp))
@@ -119,10 +131,9 @@ def process(msg: queue.QueueMessage) -> None:
                 result = analyze_match(
                     job.match_id, video_path,
                     max_rallies=MAX_RALLIES, job_id=job.job_id, youtube_url=job.youtube_url,
-                    on_rally_done=heartbeat,
+                    on_rally_done=heartbeat, on_progress=on_progress,
                 )
 
-    key = storage.result_key(job.job_id)
     with timed("s3_write"):
         storage.put_json(key, result.model_dump_json())
     state.update_status(job.job_id, "complete", result_key=key)

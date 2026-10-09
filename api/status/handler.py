@@ -15,7 +15,8 @@ _dynamodb = boto3.resource("dynamodb")
 _s3 = boto3.client("s3", config=Config(signature_version="s3v4"))
 
 RESULT_URL_TTL_SEC = 3600
-PUBLIC_FIELDS = ("job_id", "status", "source", "match_id", "youtube_url", "error", "created_at", "updated_at")
+PUBLIC_FIELDS = ("job_id", "status", "source", "match_id", "youtube_url", "error", "progress",
+                 "created_at", "updated_at")
 
 
 def _response(status: int, body: dict) -> dict:
@@ -47,8 +48,10 @@ def handler(event, context):
             Params={"Bucket": os.environ["S3_BUCKET_NAME"], "Key": item["video_key"]},
             ExpiresIn=RESULT_URL_TTL_SEC,
         )
-    if item.get("status") == "complete" and item.get("result_key"):
+    if item.get("result_key"):
         # The bucket stays private; the client gets a short-lived read link.
+        # While processing, the worker rewrites this object after every rally,
+        # so the UI can show finished rallies before the whole job is done.
         body["result_url"] = _s3.generate_presigned_url(
             "get_object",
             Params={"Bucket": os.environ["S3_BUCKET_NAME"], "Key": item["result_key"]},

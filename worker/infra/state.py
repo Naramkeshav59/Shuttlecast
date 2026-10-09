@@ -29,10 +29,14 @@ def get_job(job_id: str) -> Job | None:
 
 def update_status(
     job_id: str, status: str, *, result_key: str | None = None, error: str | None = None,
+    progress: str | None = None,
 ) -> None:
     names = {"#s": "status"}
     values = {":s": status, ":u": _now()}
     sets = ["#s = :s", "updated_at = :u"]
+    if progress is not None:
+        sets.append("progress = :p")
+        values[":p"] = progress
     if result_key is not None:
         sets.append("result_key = :r")
         values[":r"] = result_key

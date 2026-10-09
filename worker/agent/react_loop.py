@@ -96,6 +96,7 @@ def analyze_match(
     job_id: str | None = None,
     youtube_url: str | None = None,
     on_rally_done: Callable[[Rally], None] | None = None,
+    on_progress: Callable[[JobResult, int], None] | None = None,
     only: set[tuple[int, int]] | None = None,
     traces: dict | None = None,
 ) -> JobResult:
@@ -111,7 +112,7 @@ def analyze_match(
     fps = check_fps_alignment(video_path, expected_fps(match_id))
     return analyze_rallies(
         match_id, rallies, video_path, fps, job_id=job_id, youtube_url=youtube_url,
-        on_rally_done=on_rally_done, only=only, traces=traces,
+        on_rally_done=on_rally_done, on_progress=on_progress, only=only, traces=traces,
     )
 
 
@@ -124,6 +125,7 @@ def analyze_rallies(
     job_id: str | None = None,
     youtube_url: str | None = None,
     on_rally_done: Callable[[Rally], None] | None = None,
+    on_progress: Callable[[JobResult, int], None] | None = None,
     only: set[tuple[int, int]] | None = None,
     traces: dict | None = None,
 ) -> JobResult:
@@ -134,6 +136,11 @@ def analyze_rallies(
     agent = build_agent(state)
     reports: list[RallyReport] = []
     errors: list[RallyError] = []
+    todo = sum(1 for r in rallies if only is None or (r.set_num, r.rally_id) in only)
+
+    def snapshot() -> JobResult:
+        return JobResult(job_id=job_id, match_id=match_id, youtube_url=youtube_url, fps=fps,
+                         rallies=list(reports), errors=list(errors))
 
     for rally in rallies:
         if only is not None and (rally.set_num, rally.rally_id) not in only:
@@ -141,7 +148,16 @@ def analyze_rallies(
             continue
         try:
             with timed("agent_rally", set_num=rally.set_num, rally_id=rally.rally_id):
-                result, messages = analyze_rally(agent, state, rally, video_path)
+                try:
+                    result, messages = analyze_rally(agent, state, rally, video_path)
+                except Exception as exc:
+                    # gpt-oss on Groq sometimes writes its reasoning where the
+                    # tool call belongs (400 output_parse_failed). It's a sampling
+                    # fluke, not a bad input, so one retry usually succeeds.
+                    if "output_parse_failed" not in str(exc):
+                        raise
+                    log_event("rally_retry", set_num=rally.set_num, rally_id=rally.rally_id)
+                    result, messages = analyze_rally(agent, state, rally, video_path)
             if traces is not None:
                 traces[(rally.set_num, rally.rally_id)] = messages
             reports.append(RallyReport(
@@ -161,11 +177,10 @@ def analyze_rallies(
             log_event("rally_failed", set_num=rally.set_num, rally_id=rally.rally_id, error=repr(exc)[:500])
         if on_rally_done:
             on_rally_done(rally)
+        if on_progress:
+            on_progress(snapshot(), todo)
 
-    return JobResult(
-        job_id=job_id, match_id=match_id, youtube_url=youtube_url, fps=fps,
-        rallies=reports, errors=errors,
-    )
+    return snapshot()
 
 
 def print_trace(messages: list) -> None:

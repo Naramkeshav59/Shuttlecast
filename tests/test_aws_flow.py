@@ -2,6 +2,7 @@
 DynamoDB + SQS -> worker -> S3 -> status Lambda. No real AWS account or
 model calls; analyze_match is stubbed."""
 import importlib.util
+import inspect
 import json
 import sys
 from pathlib import Path
@@ -140,9 +141,16 @@ def test_worker_happy_path(aws, monkeypatch, tmp_path):
 
     seen = {}
 
+    real_signature = inspect.signature(worker_main.analyze_match)
+
     def fake_analyze_match(match_id, video_path, **kwargs):
+        # a fake that accepts any kwargs once hid a worker/agent signature
+        # mismatch -- bind against the real function so that can't recur
+        real_signature.bind(match_id, video_path, **kwargs)
         seen["video_exists"] = Path(video_path).exists()
         kwargs["on_rally_done"](None)  # exercise the visibility heartbeat
+        kwargs["on_progress"](_fake_result(kwargs["job_id"]), 4)
+        seen["mid_job"] = _get(status_mod, kwargs["job_id"])
         return _fake_result(kwargs["job_id"])
 
     monkeypatch.setattr(worker_main, "analyze_match", fake_analyze_match)
@@ -150,6 +158,9 @@ def test_worker_happy_path(aws, monkeypatch, tmp_path):
     worker_main.handle(queue.receive_job(wait_seconds=0))
 
     assert seen["video_exists"], "worker should have pulled the clip from S3"
+    mid = seen["mid_job"]  # finished rallies are readable before the job completes
+    assert mid["status"] == "processing" and mid["progress"] == "Analyzed 1 of 4 rallies"
+    assert mid["result_url"].startswith("https://")
     resp = _get(status_mod, job_id)
     assert resp["http"] == 200 and resp["status"] == "complete"
     assert resp["result_url"].startswith("https://")
