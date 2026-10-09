@@ -7,9 +7,12 @@ import os
 import uuid
 
 import boto3
+from botocore.config import Config
 
 _dynamodb = boto3.resource("dynamodb")
-_s3 = boto3.client("s3")
+# SigV4 explicitly: unconfigured boto3 presigns with SigV2, which signs
+# Content-Type, so a PUT that sends one gets a 403 (and SigV2 is deprecated).
+_s3 = boto3.client("s3", config=Config(signature_version="s3v4"))
 
 RESULT_URL_TTL_SEC = 3600
 PUBLIC_FIELDS = ("job_id", "status", "source", "match_id", "youtube_url", "error", "created_at", "updated_at")

@@ -22,12 +22,15 @@ from pathlib import Path, PurePosixPath
 from urllib.parse import urlparse
 
 import boto3
+from botocore.config import Config
 from botocore.exceptions import ClientError
 
 # Module scope so warm invocations reuse the clients instead of rebuilding them.
 _dynamodb = boto3.resource("dynamodb")
 _sqs = boto3.client("sqs")
-_s3 = boto3.client("s3")
+# SigV4 explicitly: unconfigured boto3 presigns with SigV2, which signs
+# Content-Type, so a PUT that sends one gets a 403 (and SigV2 is deprecated).
+_s3 = boto3.client("s3", config=Config(signature_version="s3v4"))
 
 YOUTUBE_HOSTS = {"youtube.com", "www.youtube.com", "m.youtube.com", "youtu.be"}
 VIDEO_EXTS = {".mp4", ".mov", ".mkv", ".webm"}
