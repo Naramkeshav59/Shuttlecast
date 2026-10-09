@@ -27,6 +27,16 @@ class PermanentJobError(Exception):
     download) -- fail the job now with a message the user can act on."""
 
 
+def _explain_rally_failures(result: JobResult) -> str:
+    first = result.errors[0].error
+    if "tokens per day" in first:
+        # Groq's free tier: 200K tokens/day per model, on a rolling 24h window.
+        # An SQS retry minutes later would hit the same wall.
+        return ("The AI model's free daily token quota (Groq) is used up, so no rally "
+                "could be analyzed. Try again later.")
+    return f"All {len(result.errors)} rallies failed to analyze. First error: {first[:300]}"
+
+
 _recognizer = None
 
 
@@ -134,6 +144,10 @@ def process(msg: queue.QueueMessage) -> None:
                     on_rally_done=heartbeat, on_progress=on_progress,
                 )
 
+    if not result.rallies and result.errors:
+        # Every rally failed: that's a failed job, not a 'complete' one with
+        # nothing in it (which the UI can't render).
+        raise PermanentJobError(_explain_rally_failures(result))
     with timed("s3_write"):
         storage.put_json(key, result.model_dump_json())
     state.update_status(job.job_id, "complete", result_key=key)

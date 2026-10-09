@@ -273,3 +273,26 @@ def test_worker_video_job_without_rallies_fails_once(aws, monkeypatch):
     job = state.get_job(job_id)
     assert job.status == "failed" and "No rallies found" in job.error
     assert queue.receive_job(wait_seconds=0) is None, "permanent failure must not be retried"
+
+
+def test_job_with_every_rally_failed_is_failed_not_complete(aws, monkeypatch):
+    """A 'complete' job with zero rallies crashed the UI; and a daily-quota
+    429 won't clear on an SQS retry minutes later, so fail once, clearly."""
+    from shared.models import RallyError
+    from worker import main as worker_main
+    from worker.infra import queue, state
+
+    intake = _load_handler("intake")
+    job_id = _post(intake, {"match_id": MATCH_ID, "youtube_url": URL})["job_id"]
+    quota = "RateLimitError('... on tokens per day (TPD): Limit 200000, Used 199283 ...')"
+
+    def all_fail(match_id, video_path, **kwargs):
+        return JobResult(job_id=job_id, match_id=MATCH_ID, youtube_url=URL, fps=30.0, rallies=[],
+                         errors=[RallyError(set_num=1, rally_id=i, error=quota) for i in (1, 2)])
+
+    monkeypatch.setattr(worker_main, "fetch_video", lambda job, d: d / "clip.mp4")
+    monkeypatch.setattr(worker_main, "analyze_match", all_fail)
+    worker_main.handle(queue.receive_job(wait_seconds=0))
+    job = state.get_job(job_id)
+    assert job.status == "failed" and "daily token quota" in job.error
+    assert queue.receive_job(wait_seconds=0) is None, "must not retry a quota failure"

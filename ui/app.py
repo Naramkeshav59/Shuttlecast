@@ -440,7 +440,12 @@ def poll_job(job_id: str) -> None:
         return
     job = resp.json()
     if job["status"] == "complete":
-        st.session_state.result = JobResult(**requests.get(job["result_url"], timeout=30).json())
+        result = JobResult(**requests.get(job["result_url"], timeout=30).json())
+        if not result.rallies:
+            st.error("The job finished but no rally could be analyzed"
+                     + (f": {result.errors[0].error[:300]}" if result.errors else "."))
+            return
+        st.session_state.result = result
         # uploads play from a presigned S3 link; YouTube jobs from the link itself
         st.session_state.video_source = job.get("video_url") or job.get("youtube_url")
         st.rerun(scope="app")
