@@ -40,7 +40,9 @@ from worker.pipeline.ingest import summarize_strokes
 
 # Groq's catalog has moved on from Llama 3.3/Mixtral since this stack was
 # planned; gpt-oss-120b is the current largest general-purpose model there.
-GROQ_MODEL = "openai/gpt-oss-120b"
+# Overridable: each Groq model has its own free-tier daily quota, so a
+# deployment can switch models when one is exhausted.
+GROQ_MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b")
 GEMINI_MODEL = "gemini-2.0-flash"
 
 

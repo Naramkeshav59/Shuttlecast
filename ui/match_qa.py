@@ -10,7 +10,7 @@ from groq import Groq
 
 from shared.models import JobResult
 
-QA_MODEL = "openai/gpt-oss-120b"
+QA_MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b")
 
 SYSTEM_PROMPT = """You are ShuttleCast, a badminton tactics assistant. Answer \
 the user's question using ONLY the per-rally analyses of this match given \

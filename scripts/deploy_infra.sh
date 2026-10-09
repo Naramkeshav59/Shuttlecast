@@ -32,6 +32,7 @@ overrides+=("VpcId=$VPC_ID" "SubnetIds=$SUBNETS")
 [ -n "${UI_COUNT:-}" ] && overrides+=("UiDesiredCount=$UI_COUNT")
 [ -n "${IMAGE_TAG:-}" ] && overrides+=("ImageTag=$IMAGE_TAG")
 [ -n "${MAX_RALLIES:-}" ] && overrides+=("MaxRallies=$MAX_RALLIES")
+[ -n "${GROQ_MODEL:-}" ] && overrides+=("GroqModel=$GROQ_MODEL")
 
 echo "Deploying stack $STACK to $AWS_DEFAULT_REGION (VPC $VPC_ID)..."
 aws cloudformation deploy \

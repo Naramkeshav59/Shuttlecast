@@ -32,6 +32,10 @@ Parameters:
     Type: String
     Default: ""
     Description: Cap rallies per job (cost/rate-limit control); empty = whole match.
+  GroqModel:
+    Type: String
+    Default: openai/gpt-oss-120b
+    Description: Groq model for the agent and chat Q&A. Each model has its own free-tier daily quota.
 
 Conditions:
   HasGemini: !Not [!Equals [!Ref GeminiApiKeyParam, ""]]
@@ -383,6 +387,7 @@ Resources:
             - { Name: AWS_DEFAULT_REGION, Value: !Ref AWS::Region }
             - { Name: MAX_RALLIES, Value: !Ref MaxRallies }
             - { Name: MAX_VIDEO_MINUTES, Value: "10" }
+            - { Name: GROQ_MODEL, Value: !Ref GroqModel }
           Secrets:
             - Name: GROQ_API_KEY
               ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GroqApiKeyParam}
@@ -487,6 +492,7 @@ Resources:
             - ContainerPort: 8501
           Environment:
             - { Name: SHUTTLECAST_API_URL, Value: !GetAtt HttpApi.ApiEndpoint }
+            - { Name: GROQ_MODEL, Value: !Ref GroqModel }
           Secrets:
             # chat Q&A over the finished analysis (ui/match_qa.py)
             - Name: GROQ_API_KEY
