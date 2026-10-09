@@ -12,6 +12,11 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# Newer RunPod images (Ubuntu 24.04) refuse system-wide pip installs
+# (PEP 668). A venv that can still see the image's CUDA torch avoids both
+# that and a 2 GB torch reinstall.
+python -m venv --system-site-packages .venv
+. .venv/bin/activate
 pip install -q -r training/requirements.txt
 
 python training/finetune.py --config training/configs/qlora_config.yaml
