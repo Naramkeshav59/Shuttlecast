@@ -362,11 +362,14 @@ def local_mode() -> None:
 def aws_mode() -> None:
     sidebar_header()
     source = st.sidebar.radio("Source", ["Pro match (ShuttleSet)", "Your video"], horizontal=True)
-    if st.session_state.get("source") != source:
+    # Clear the old job only on a real switch. On a fresh page load there's no
+    # previous source, and clearing then wiped ?job= -- refreshing the page
+    # lost the job you were waiting on.
+    if "source" in st.session_state and st.session_state.source != source:
         for k in ("result", "chat", "traces", "now_playing", "job_id", "video_source", "match_id"):
             st.session_state.pop(k, None)
         st.query_params.clear()
-        st.session_state.source = source
+    st.session_state.source = source
     st.sidebar.caption("Connected to the AWS backend")
 
     if source == "Your video":
