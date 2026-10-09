@@ -13,6 +13,10 @@ wrong, and what the player should have done instead.
 | **What I built** | Stroke-recognition models trained on ShuttleSet that turn any match video into labelled rallies; a ReAct agent that decides per rally what is worth analyzing and writes the coaching note; deployed as an async queue-backed AWS service. |
 | **Impact** | Hit detection on raw broadcast footage: F1 **0.87**, vs 0.37 for the audio baseline. Coaching notes that blame the right player: **62% → 94%**. QLoRA on a 2B model took format compliance from **0% to 100%** for under $0.20 of GPU time. |
 
+**Demo** (3 min, live AWS deployment; waits are fast-forwarded and labelled):
+
+<!-- DEMO_VIDEO: paste the github.com/user-attachments/assets/... link on its own line here -->
+
 ```text
 Set 1 / Rally 2 — won by B                                   depth: surface
 [Action]      analyze_stroke_sequence()            -> 4 strokes: unknown, clear, clear, wrist smash
@@ -209,9 +213,10 @@ unusable here without fine-tuning. Caveats:
   the next run.
 - 0.72 similarity is below the 0.75 target.
 
-**Tests**: 22 tests (`pytest tests/`). They cover the full intake → queue →
+**Tests**: 28 tests (`pytest tests/`). They cover the full intake → queue →
 worker → S3 → status flow against moto's in-memory AWS (validation, retries,
-duplicate delivery, phantom-job protection) and every evaluation metric.
+duplicate delivery, phantom-job protection, uploads, partial results,
+all-rallies-failed jobs) and every evaluation metric.
 
 ## Evaluation
 
@@ -256,6 +261,8 @@ scripts/deploy_api.sh             # upload both Lambda handlers
 python3 scripts/upload_videos.py  # verified clips → s3://.../videos/
 scripts/deploy_worker.sh          # build + push images (git-SHA tags), scale to 1
 # UI: the UiUrl stack output. Cap per-job cost with MAX_RALLIES=10 scripts/deploy_infra.sh
+# Switch models without a rebuild (each Groq model has its own free-tier
+# daily quota): GROQ_MODEL=openai/gpt-oss-20b scripts/deploy_infra.sh
 scripts/teardown.sh               # delete everything when you're done
 ```
 
